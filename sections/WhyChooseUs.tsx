@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { FeatureCard } from "@/components/shared/FeatureCard";
-import { features as fallbackFeatures } from "@/data/features";
+
 import { resolveIcon } from "@/lib/icons";
 import type { FeatureItem } from "@/types";
 
 export function WhyChooseUs() {
-  const [featuresList, setFeaturesList] = useState<FeatureItem[]>(fallbackFeatures);
+  const [featuresList, setFeaturesList] = useState<FeatureItem[]>([]);
 
   useEffect(() => {
     fetch("/api/content/features")

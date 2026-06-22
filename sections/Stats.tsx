@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { AnimatedCounter } from "@/components/shared/AnimatedCounter";
-import { stats as fallbackStats } from "@/data/stats";
+
 import type { StatItem } from "@/types";
 
 export function Stats() {
-  const [statsList, setStatsList] = useState<StatItem[]>(fallbackStats);
+  const [statsList, setStatsList] = useState<StatItem[]>([]);
 
   useEffect(() => {
     fetch("/api/content/stats")

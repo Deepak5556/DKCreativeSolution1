@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { videoItems as fallbackVideos, videoFilters } from "@/data/videos";
+import { videoFilters } from "@/data/data";
 import type { VideoItem } from "@/types";
 
 function renderVideoPlayer(url: string) {
@@ -67,7 +67,7 @@ function renderVideoPlayer(url: string) {
 export function VideoPortfolio() {
   const [filter, setFilter] = useState<string>("all");
   const [active, setActive] = useState<VideoItem | null>(null);
-  const [videosList, setVideosList] = useState<VideoItem[]>(fallbackVideos);
+  const [videosList, setVideosList] = useState<VideoItem[]>([]);
 
   useEffect(() => {
     fetch("/api/content/videos")

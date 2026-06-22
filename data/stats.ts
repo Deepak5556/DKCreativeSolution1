@@ -1,8 +1,0 @@
-import type { StatItem } from "@/types";
-
-export const stats: StatItem[] = [
-  { id: "projects", value: 50, suffix: "+", label: "Projects Delivered" },
-  { id: "clients", value: 20, suffix: "+", label: "Happy Clients" },
-  { id: "services", value: 3, suffix: "+", label: "Core Services" },
-  { id: "satisfaction", value: 100, suffix: "%", label: "Client Satisfaction" },
-];

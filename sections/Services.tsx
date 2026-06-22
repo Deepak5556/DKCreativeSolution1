@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { ServiceCard } from "@/components/shared/ServiceCard";
-import { services as fallbackServices } from "@/data/services";
+
 import { resolveIcon } from "@/lib/icons";
 import type { ServiceItem } from "@/types";
 import {
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 
 export function Services() {
-  const [servicesList, setServicesList] = useState<ServiceItem[]>(fallbackServices);
+  const [servicesList, setServicesList] = useState<ServiceItem[]>([]);
   const [activeQuoteService, setActiveQuoteService] = useState<ServiceItem | null>(null);
 
   // Inquiry Form States

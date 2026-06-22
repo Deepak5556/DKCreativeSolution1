@@ -6,11 +6,11 @@ import Autoplay from "embla-carousel-autoplay";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { TestimonialCard } from "@/components/shared/TestimonialCard";
-import { testimonials as fallbackTestimonials } from "@/data/testimonials";
+
 import type { TestimonialItem } from "@/types";
 
 export function Testimonials() {
-  const [testimonialsList, setTestimonialsList] = useState<TestimonialItem[]>(fallbackTestimonials);
+  const [testimonialsList, setTestimonialsList] = useState<TestimonialItem[]>([]);
 
   useEffect(() => {
     fetch("/api/content/testimonials")

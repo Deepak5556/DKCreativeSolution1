@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { ProjectCard } from "@/components/shared/ProjectCard";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { projects as fallbackProjects, projectCategories } from "@/data/projects";
+import { projectCategories } from "@/data/data";
 import { resolveIcon } from "@/lib/icons";
 import type { ProjectItem, ProjectCategory } from "@/types";
 
@@ -13,7 +13,7 @@ type FilterValue = "All" | ProjectCategory;
 
 export function Projects() {
   const [filter, setFilter] = useState<FilterValue>("All");
-  const [projectsList, setProjectsList] = useState<ProjectItem[]>(fallbackProjects);
+  const [projectsList, setProjectsList] = useState<ProjectItem[]>([]);
 
   useEffect(() => {
     fetch("/api/content/projects")

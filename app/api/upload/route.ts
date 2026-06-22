@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import fs from "fs/promises";
-import path from "path";
-
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
+import { supabase } from "@/lib/supabase";
 
 async function checkAuth(): Promise<boolean> {
   const cookieStore = await cookies();
@@ -19,16 +16,10 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
+    const bucket = (formData.get("bucket") as string) || "project-images"; // Default fallback
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
-    }
-
-    // Ensure upload directory exists
-    try {
-      await fs.mkdir(UPLOAD_DIR, { recursive: true });
-    } catch {
-      // Ignore if directory exists
     }
 
     const bytes = await file.arrayBuffer();
@@ -37,16 +28,28 @@ export async function POST(request: NextRequest) {
     // Sanitize and create a unique name
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
     const filename = `${Date.now()}-${sanitizedName}`;
-    const filePath = path.join(UPLOAD_DIR, filename);
 
-    // Write file to local disk
-    await fs.writeFile(filePath, buffer);
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(filename, buffer, {
+        contentType: file.type,
+        upsert: false,
+      });
 
-    const relativeUrl = `/uploads/${filename}`;
+    if (error) {
+      console.error("Supabase storage error:", error);
+      throw error;
+    }
+
+    // Get public URL
+    const { data: publicUrlData } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(filename);
 
     return NextResponse.json({
       success: true,
-      url: relativeUrl,
+      url: publicUrlData.publicUrl,
       name: file.name,
     });
   } catch (err) {

@@ -6,7 +6,8 @@ import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import { PageLoader } from "@/components/shared/PageLoader";
-import { siteConfig } from "@/lib/constants";
+import { supabase } from "@/lib/supabase";
+import { siteConfig as fallbackConfig } from "@/lib/constants";
 import { getOrganizationSchema, getWebsiteSchema } from "@/lib/schema";
 
 const displayFont = Bricolage_Grotesque({
@@ -27,61 +28,87 @@ const monoFont = JetBrains_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  title: {
-    default: `${siteConfig.name} | ${siteConfig.tagline}`,
-    template: `%s | ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-  keywords: siteConfig.keywords,
-  authors: [{ name: siteConfig.founder, url: siteConfig.url }],
-  creator: siteConfig.name,
-  publisher: siteConfig.name,
-  applicationName: siteConfig.name,
-  formatDetection: { telephone: true, email: true, address: true },
-  alternates: { canonical: siteConfig.url },
-  category: "technology",
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+export async function generateMetadata(): Promise<Metadata> {
+  let config = fallbackConfig;
+  try {
+    const { data } = await supabase.from("site_settings").select("*").limit(1).single();
+    if (data) {
+      config = {
+        ...config,
+        name: data.name || config.name,
+        shortName: data.short_name || config.shortName,
+        tagline: data.tagline || config.tagline,
+        description: data.description || config.description,
+        url: data.url || config.url,
+        ogImage: data.og_image || config.ogImage,
+        email: data.email || config.email,
+        phone: data.phone || config.phone,
+        phoneRaw: data.phone_raw || config.phoneRaw,
+        location: data.location || config.location,
+        founder: data.founder || config.founder,
+        keywords: data.keywords && data.keywords.length ? data.keywords : config.keywords,
+      };
+    }
+  } catch (err) {
+    console.error("Failed to fetch site config from Supabase:", err);
+  }
+
+  return {
+    metadataBase: new URL(config.url),
+    title: {
+      default: `${config.name} | ${config.tagline}`,
+      template: `%s | ${config.name}`,
+    },
+    description: config.description,
+    keywords: config.keywords,
+    authors: [{ name: config.founder, url: config.url }],
+    creator: config.name,
+    publisher: config.name,
+    applicationName: config.name,
+    formatDetection: { telephone: true, email: true, address: true },
+    alternates: { canonical: config.url },
+    category: "technology",
+    robots: {
       index: true,
       follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-    },
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: siteConfig.url,
-    siteName: siteConfig.name,
-    title: `${siteConfig.name} | ${siteConfig.tagline}`,
-    description: siteConfig.description,
-    images: [
-      {
-        url: "/opengraph-image",
-        width: 1200,
-        height: 630,
-        alt: siteConfig.name,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
       },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${siteConfig.name} | ${siteConfig.tagline}`,
-    description: siteConfig.description,
-    images: ["/opengraph-image"],
-    creator: "@dkcreativesoln",
-  },
-  icons: {
-    icon: "/icon",
-    shortcut: "/icon",
-    apple: "/icon",
-  },
-};
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: config.url,
+      siteName: config.name,
+      title: `${config.name} | ${config.tagline}`,
+      description: config.description,
+      images: [
+        {
+          url: config.ogImage,
+          width: 1200,
+          height: 630,
+          alt: config.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${config.name} | ${config.tagline}`,
+      description: config.description,
+      images: [config.ogImage],
+      creator: "@dkcreativesoln",
+    },
+    icons: {
+      icon: "/icon",
+      shortcut: "/icon",
+      apple: "/icon",
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#050505",

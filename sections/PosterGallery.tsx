@@ -4,12 +4,12 @@ import { useMemo, useState, useEffect } from "react";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { PosterCard } from "@/components/shared/PosterCard";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { posters as fallbackPosters, posterCategories } from "@/data/posters";
+import { posterCategories } from "@/data/data";
 import type { PosterItem } from "@/types";
 
 export function PosterGallery() {
   const [filter, setFilter] = useState<string>("All");
-  const [postersList, setPostersList] = useState<PosterItem[]>(fallbackPosters);
+  const [postersList, setPostersList] = useState<PosterItem[]>([]);
 
   useEffect(() => {
     fetch("/api/content/posters")

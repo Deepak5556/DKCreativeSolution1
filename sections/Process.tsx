@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { SectionHeading } from "@/components/shared/SectionHeading";
-import { processSteps as fallbackProcess } from "@/data/process";
+
 import { resolveIcon } from "@/lib/icons";
 import type { ProcessStepItem } from "@/types";
 
 export function Process() {
-  const [processStepsList, setProcessStepsList] = useState<ProcessStepItem[]>(fallbackProcess);
+  const [processStepsList, setProcessStepsList] = useState<ProcessStepItem[]>([]);
 
   useEffect(() => {
     fetch("/api/content/process")

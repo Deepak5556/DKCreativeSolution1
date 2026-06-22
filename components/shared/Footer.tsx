@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   Github,
   Linkedin,
@@ -16,7 +17,7 @@ import {
 import { Logo } from "@/components/shared/Logo";
 import { Separator } from "@/components/ui/separator";
 import { NAV_LINKS, siteConfig } from "@/lib/constants";
-import { services } from "@/data/services";
+import type { ServiceItem } from "@/types";
 
 const socialLinks = [
   { label: "GitHub", href: siteConfig.links.github, icon: Github },
@@ -29,6 +30,16 @@ const socialLinks = [
 export function Footer() {
   const pathname = usePathname();
   const year = new Date().getFullYear();
+  const [servicesList, setServicesList] = useState<ServiceItem[]>([]);
+
+  useEffect(() => {
+    fetch("/api/content/services")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setServicesList(data);
+      })
+      .catch((err) => console.error("Error loading services for footer:", err));
+  }, []);
 
   if (pathname?.startsWith("/admin")) {
     return null;
@@ -93,7 +104,7 @@ export function Footer() {
               Services
             </h3>
             <ul className="mt-5 flex flex-col gap-3">
-              {services.slice(0, 6).map((service) => (
+              {servicesList.slice(0, 6).map((service) => (
                 <li key={service.id}>
                   <a
                     href="#services"
