@@ -1,0 +1,84 @@
+import type { VideoItem } from "@/types";
+
+export const videoItems: VideoItem[] = [
+  {
+    id: "brand-reel-01",
+    title: "Brand Launch Reel",
+    category: "Reel Preview",
+    duration: "0:32",
+    type: "reel",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-his-computer-3831-large.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=600&auto=format&fit=crop"
+  },
+  {
+    id: "product-reel-02",
+    title: "Product Showcase Reel",
+    category: "Reel Preview",
+    duration: "0:28",
+    type: "reel",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-man-typing-on-a-keyboard-4054-large.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=600&auto=format&fit=crop"
+  },
+  {
+    id: "color-grade-before-after",
+    title: "Cinematic Color Grade",
+    category: "Before / After",
+    duration: "0:15",
+    type: "before-after",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-cinematic-shot-of-a-woman-walking-slowly-in-a-forest-41913-large.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop"
+  },
+  {
+    id: "audio-cleanup-before-after",
+    title: "Audio & Pacing Cleanup",
+    category: "Before / After",
+    duration: "0:20",
+    type: "before-after",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-dj-adjusting-sound-on-audio-mixer-41611-large.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=600&auto=format&fit=crop"
+  },
+  {
+    id: "short-01",
+    title: "Tech Tips Short",
+    category: "YouTube Shorts",
+    duration: "0:45",
+    type: "short",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-man-working-on-a-laptop-in-a-cafe-41712-large.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=600&auto=format&fit=crop"
+  },
+  {
+    id: "short-02",
+    title: "Behind the Scenes Short",
+    category: "YouTube Shorts",
+    duration: "0:38",
+    type: "short",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-photographer-taking-photos-at-a-studio-41604-large.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=600&auto=format&fit=crop"
+  },
+  {
+    id: "motion-01",
+    title: "Logo Reveal Animation",
+    category: "Motion Graphics",
+    duration: "0:10",
+    type: "motion-graphics",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-a-glowing-neon-tunnel-41703-large.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop"
+  },
+  {
+    id: "motion-02",
+    title: "Kinetic Typography Promo",
+    category: "Motion Graphics",
+    duration: "0:18",
+    type: "motion-graphics",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-typing-text-on-a-computer-screen-41709-large.mp4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop"
+  }
+];
+
+export const videoFilters = [
+  { id: "all", label: "All" },
+  { id: "reel", label: "Reel Previews" },
+  { id: "before-after", label: "Before / After" },
+  { id: "short", label: "YouTube Shorts" },
+  { id: "motion-graphics", label: "Motion Graphics" },
+] as const;

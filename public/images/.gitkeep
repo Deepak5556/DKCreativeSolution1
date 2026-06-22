@@ -1,0 +1,4 @@
+Drop your real project screenshots, poster designs, and video thumbnails
+here, then reference them from the relevant files in /data and swap
+ArtworkTile for next/image in the matching card component. See README.md
+-> "Replacing Placeholder Visuals".

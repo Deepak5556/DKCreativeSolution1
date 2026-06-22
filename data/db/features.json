@@ -1,0 +1,38 @@
+[
+  {
+    "id": "fast-delivery",
+    "icon": "Zap",
+    "title": "Fast Delivery",
+    "description": "Clear timelines and milestone check-ins so your project ships on schedule, every time."
+  },
+  {
+    "id": "premium-quality",
+    "icon": "Gem",
+    "title": "Premium Quality",
+    "description": "Every pixel, transition, and line of code is reviewed against an enterprise-grade quality bar."
+  },
+  {
+    "id": "responsive-support",
+    "icon": "Headset",
+    "title": "Responsive Support",
+    "description": "Direct access during and after delivery — questions and revisions get same-day responses."
+  },
+  {
+    "id": "modern-technologies",
+    "icon": "Cpu",
+    "title": "Modern Technologies",
+    "description": "Built on Next.js, TypeScript, and current best practices — future-proof from day one."
+  },
+  {
+    "id": "affordable-pricing",
+    "icon": "Wallet",
+    "title": "Affordable Pricing",
+    "description": "Transparent, project-based quotes with no hidden costs — premium work without agency overhead."
+  },
+  {
+    "id": "creative-designs",
+    "icon": "Brush",
+    "title": "Creative Designs",
+    "description": "Distinctive visual direction tailored to your brand, never a recycled template."
+  }
+]

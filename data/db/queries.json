@@ -1,0 +1,46 @@
+[
+  {
+    "id": "query-1782141178357",
+    "name": "Deepakkumar V",
+    "email": "deepakviji5556@gmail.com",
+    "phone": "+917010797161",
+    "category": "UI/UX Design",
+    "priority": "1 Month",
+    "subCategory": "",
+    "details": "I want My Portfolio Unique Design ",
+    "createdAt": "2026-06-22T15:12:58.357Z"
+  },
+  {
+    "id": "query-1782145064073",
+    "name": "Deepakkumar V",
+    "email": "deepak@gmail.com",
+    "phone": "+917010797161",
+    "category": "Video Editing",
+    "priority": "1 Month",
+    "subCategory": "Reels / Shorts (Vertical)",
+    "details": "",
+    "createdAt": "2026-06-22T16:17:44.073Z"
+  },
+  {
+    "id": "query-1782145660796",
+    "name": "Deepakkumar V",
+    "email": "deepakviji5556@gmail.com",
+    "phone": "+917010797161",
+    "category": "Video Editing",
+    "priority": "1 Month",
+    "subCategory": "Reels / Shorts (Vertical)",
+    "details": "",
+    "createdAt": "2026-06-22T16:27:40.796Z"
+  },
+  {
+    "id": "query-1782146764253",
+    "name": "Deepakkumar V",
+    "email": "deepakviji5556@gmail.com",
+    "phone": "+917010797161",
+    "category": "Web Development",
+    "priority": "1 Month",
+    "subCategory": "Full Stack Web App",
+    "details": "",
+    "createdAt": "2026-06-22T16:46:04.253Z"
+  }
+]
