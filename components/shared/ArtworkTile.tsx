@@ -5,7 +5,7 @@ interface ArtworkTileProps {
   seed: string;
   icon: LucideIcon;
   label?: string;
-  accent?: "gold" | "silver" | "mixed";
+  accent?: "gold" | "purple" | "silver" | "mixed";
   className?: string;
 }
 
@@ -24,9 +24,10 @@ export function ArtworkTile({ seed, icon: Icon, label, accent = "gold", classNam
   const blobY2 = seededRange(seed + "y2", 10, 90);
   const rotate = Math.round(seededRange(seed + "r", -18, 18));
 
+  const resolvedAccent = (accent === "purple" || accent === "gold") ? "gold" : accent;
   const accentColor =
-    accent === "silver" ? "#D6D0CB" : accent === "mixed" ? "#FFB800" : "#F7A500";
-  const accentColor2 = accent === "silver" ? "#A3A3A3" : "#F7A500";
+    resolvedAccent === "silver" ? "#D6D0CB" : resolvedAccent === "mixed" ? "#F4D76A" : "#D4AF37";
+  const accentColor2 = resolvedAccent === "silver" ? "#A3A3A3" : "#E6C65C";
 
   return (
     <div

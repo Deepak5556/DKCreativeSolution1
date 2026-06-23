@@ -16,18 +16,19 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { Separator } from "@/components/ui/separator";
-import { NAV_LINKS, siteConfig } from "@/lib/constants";
+import { NAV_LINKS } from "@/lib/constants";
+import { useSiteConfig } from "@/components/shared/SiteConfigProvider";
 import type { ServiceItem } from "@/types";
 
-const socialLinks = [
-  { label: "GitHub", href: siteConfig.links.github, icon: Github },
-  { label: "LinkedIn", href: siteConfig.links.linkedin, icon: Linkedin },
-  { label: "Instagram", href: siteConfig.links.instagram, icon: Instagram },
-  { label: "Twitter", href: siteConfig.links.twitter, icon: Twitter },
-  { label: "YouTube", href: siteConfig.links.youtube, icon: Youtube },
-];
-
 export function Footer() {
+  const config = useSiteConfig();
+  const socialLinks = [
+    { label: "GitHub", href: config.links.github, icon: Github },
+    { label: "LinkedIn", href: config.links.linkedin, icon: Linkedin },
+    { label: "Instagram", href: config.links.instagram, icon: Instagram },
+    { label: "Twitter", href: config.links.twitter, icon: Twitter },
+    { label: "YouTube", href: config.links.youtube, icon: Youtube },
+  ];
   const pathname = usePathname();
   const year = new Date().getFullYear();
   const [servicesList, setServicesList] = useState<ServiceItem[]>([]);
@@ -125,29 +126,29 @@ export function Footer() {
             <ul className="mt-5 flex flex-col gap-4">
               <li>
                 <a
-                  href={`tel:${siteConfig.phoneRaw}`}
+                  href={`tel:${config.phoneRaw}`}
                   className="flex items-start gap-3 text-sm text-dk-muted transition-colors hover:text-primary"
                 >
                   <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  {siteConfig.phone}
+                  {config.phone}
                 </a>
               </li>
               <li>
                 <a
-                  href={`mailto:${siteConfig.email}`}
+                  href={`mailto:${config.email}`}
                   className="flex items-start gap-3 text-sm text-dk-muted transition-colors hover:text-primary"
                 >
                   <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  {siteConfig.email}
+                  {config.email}
                 </a>
               </li>
               <li className="flex items-start gap-3 text-sm text-dk-muted">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                {siteConfig.location}
+                {config.location}
               </li>
               <li>
                 <a
-                  href={siteConfig.links.whatsapp}
+                  href={config.links.whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-xs font-semibold text-white transition-all hover:border-primary/40 hover:text-primary"

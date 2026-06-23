@@ -10,11 +10,11 @@
     --accent: 0 0% 11%;
     --border: 0 0% 16%;
     --input: 0 0% 14%;
-    --ring: 40 100% 48%;
+    --ring: 43 62% 52%;
     --radius: 1rem;
 
-    --gold: 40 100% 48%;
-    --gold-2: 43 100% 50%;
+    --gold: 43 62% 52%;
+    --gold-2: 47 84% 69%;
     --silver: 27 12% 82%;
   }
 
@@ -33,7 +33,7 @@
   }
 
   ::selection {
-    background-color: rgba(247, 165, 0, 0.3);
+    background-color: rgba(212, 175, 55, 0.3);
     color: #ffffff;
   }
 
@@ -46,17 +46,17 @@
     background: #050505;
   }
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #f7a500, #ffb800);
+    background: linear-gradient(180deg, #D4AF37, #E6C65C);
     border-radius: 999px;
     border: 2px solid #050505;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #ffb800;
+    background: #F4D76A;
   }
 
   /* Visible keyboard focus for accessibility */
   :focus-visible {
-    outline: 2px solid #f7a500;
+    outline: 2px solid #D4AF37;
     outline-offset: 3px;
     border-radius: 2px;
   }
@@ -79,8 +79,9 @@
   }
 
   /* Gold gradient text */
+  .text-gradient-purple,
   .text-gradient-gold {
-    background-image: linear-gradient(135deg, #f7a500 0%, #ffb800 60%, #f7a500 100%);
+    background-image: linear-gradient(135deg, #D4AF37 0%, #E6C65C 40%, #F4D76A 60%, #FFD700 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -110,8 +111,8 @@
     transition: box-shadow 0.4s ease, border-color 0.4s ease, transform 0.4s ease;
   }
   .border-glow-hover:hover {
-    border-color: rgba(247, 165, 0, 0.45);
-    box-shadow: 0 8px 40px -8px rgba(247, 165, 0, 0.25), 0 0 0 1px rgba(247, 165, 0, 0.15);
+    border-color: rgba(212, 175, 55, 0.45);
+    box-shadow: 0 8px 40px -8px rgba(212, 175, 55, 0.25), 0 0 0 1px rgba(212, 175, 55, 0.15);
   }
 
   /* Shimmer sweep used on premium buttons */

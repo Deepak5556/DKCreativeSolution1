@@ -36,13 +36,13 @@ export function Logo({ size = 56, withRing = true, animateRing = false, classNam
     >
       <defs>
         <linearGradient id={gradId} x1="10" y1="10" x2="110" y2="110" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#FFB800" />
-          <stop offset="50%" stopColor="#F7A500" />
-          <stop offset="100%" stopColor="#FFB800" />
+          <stop offset="0%" stopColor="#F4D76A" />
+          <stop offset="50%" stopColor="#D4AF37" />
+          <stop offset="100%" stopColor="#E6C65C" />
         </linearGradient>
         <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#F7A500" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#F7A500" stopOpacity="0" />
+          <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#D4AF37" stopOpacity="0" />
         </radialGradient>
       </defs>
 

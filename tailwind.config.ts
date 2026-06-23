@@ -30,11 +30,11 @@ const config: Config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#F7A500",
+          DEFAULT: "#D4AF37",
           foreground: "#050505",
         },
         secondary: {
-          DEFAULT: "#FFB800",
+          DEFAULT: "#F4D76A",
           foreground: "#050505",
         },
         silver: {
@@ -64,8 +64,8 @@ const config: Config = {
         dk: {
           bg: "#050505",
           card: "#111111",
-          gold: "#F7A500",
-          gold2: "#FFB800",
+          gold: "#D4AF37",
+          gold2: "#E6C65C",
           silver: "#D6D0CB",
           white: "#FFFFFF",
           muted: "#A3A3A3",
@@ -84,19 +84,22 @@ const config: Config = {
         mono: ["var(--font-mono)", "monospace"],
       },
       backgroundImage: {
-        "gold-gradient": "linear-gradient(135deg, #F7A500 0%, #FFB800 100%)",
+        "purple-gradient": "linear-gradient(135deg, #D4AF37 0%, #E6C65C 40%, #F4D76A 70%, #FFD700 100%)",
+        "gold-gradient": "linear-gradient(135deg, #D4AF37 0%, #E6C65C 40%, #F4D76A 70%, #FFD700 100%)",
+        "purple-radial":
+          "radial-gradient(circle at center, rgba(212,175,55,0.18) 0%, rgba(212,175,55,0) 70%)",
         "gold-radial":
-          "radial-gradient(circle at center, rgba(247,165,0,0.18) 0%, rgba(247,165,0,0) 70%)",
+          "radial-gradient(circle at center, rgba(212,175,55,0.18) 0%, rgba(212,175,55,0) 70%)",
         "noise":
           "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E\")",
       },
       boxShadow: {
-        "glow-sm": "0 0 20px rgba(247, 165, 0, 0.25)",
-        "glow-md": "0 0 40px rgba(247, 165, 0, 0.3)",
-        "glow-lg": "0 0 80px rgba(247, 165, 0, 0.35)",
+        "glow-sm": "0 0 20px rgba(212, 175, 55, 0.25)",
+        "glow-md": "0 0 40px rgba(212, 175, 55, 0.3)",
+        "glow-lg": "0 0 80px rgba(212, 175, 55, 0.35)",
         "glow-silver": "0 0 30px rgba(214, 208, 203, 0.2)",
         "card-hover":
-          "0 8px 40px -8px rgba(247, 165, 0, 0.25), 0 0 0 1px rgba(247, 165, 0, 0.15)",
+          "0 8px 40px -8px rgba(212, 175, 55, 0.25), 0 0 0 1px rgba(212, 175, 55, 0.15)",
       },
       keyframes: {
         "accordion-down": {

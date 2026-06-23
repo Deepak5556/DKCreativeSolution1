@@ -65,7 +65,7 @@ export function VideoCard({ video, index, onPlay }: VideoCardProps) {
           />
         </>
       ) : (
-        <ArtworkTile seed={video.id} icon={Icon} accent={index % 2 === 0 ? "gold" : "silver"} className="h-full w-full" />
+        <ArtworkTile seed={video.id} icon={Icon} accent={index % 2 === 0 ? "purple" : "silver"} className="h-full w-full" />
       )}
 
       <div className="absolute inset-0 flex items-center justify-center">

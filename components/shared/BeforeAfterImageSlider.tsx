@@ -101,7 +101,7 @@ export function BeforeAfterImageSlider({ poster }: BeforeAfterImageSliderProps) 
           <div
             className="absolute top-1/2 left-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full shadow-lg"
             style={{
-              background: "linear-gradient(135deg, #D4AF37, #F5E27A, #B8860B)",
+              background: "linear-gradient(135deg, #D4AF37, #E6C65C, #F4D76A)",
             }}
           >
             <GitCompareArrows className="h-3.5 w-3.5 text-black" />

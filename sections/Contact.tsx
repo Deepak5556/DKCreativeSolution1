@@ -38,9 +38,12 @@ import {
 
 import { contactFormSchema, type ContactFormValues } from "@/lib/validations";
 import { sendContactEmail, isEmailJsConfigured } from "@/lib/emailjs";
-import { SERVICE_OPTIONS, siteConfig } from "@/lib/constants";
+import { SERVICE_OPTIONS } from "@/lib/constants";
+import { useSiteConfig } from "@/components/shared/SiteConfigProvider";
+import { ShortsThumbnailSelector, type ThumbnailOption } from "@/components/shared/ShortsThumbnailSelector";
 
 export function Contact() {
+  const config = useSiteConfig();
   const [submitted, setSubmitted] = useState(false);
 
   // Verification states
@@ -50,17 +53,21 @@ export function Contact() {
   const [pendingValues, setPendingValues] = useState<ContactFormValues | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [sendingOtp, setSendingOtp] = useState(false);
+  const [selectedThumbnail, setSelectedThumbnail] = useState<ThumbnailOption | null>(null);
 
   const {
     register,
     handleSubmit,
     reset,
     control,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: { name: "", email: "", phone: "", service: "", message: "" },
   });
+
+  const selectedService = watch("service");
 
   const onSubmit = async (values: ContactFormValues) => {
     setSendingOtp(true);
@@ -103,6 +110,11 @@ export function Contact() {
 
     setVerifying(true);
     try {
+      let finalDetails = pendingValues.message;
+      if (pendingValues.service === "Video Editing" && selectedThumbnail) {
+        finalDetails += `\n\n[Optimized Shorts Thumbnail Selection]\nSelected Frame: ${selectedThumbnail.name}\nEstimated CTR Potential: ${selectedThumbnail.ctr}%\nPreview URL (Base64/Data): ${selectedThumbnail.url.substring(0, 100)}...`;
+      }
+
       // 1. Submit to local DB with server-side validation properties
       const queryPayload = {
         id: "query-" + Date.now(),
@@ -112,7 +124,7 @@ export function Contact() {
         category: pendingValues.service,
         priority: "1 Month",
         subCategory: "",
-        details: pendingValues.message,
+        details: finalDetails,
         createdAt: new Date().toISOString(),
       };
 
@@ -134,7 +146,10 @@ export function Contact() {
 
       // 2. Submit to EmailJS
       if (isEmailJsConfigured) {
-        await sendContactEmail(pendingValues);
+        await sendContactEmail({
+          ...pendingValues,
+          message: finalDetails,
+        });
       } else {
         console.warn("EmailJS not configured. Form payload:", pendingValues);
         await new Promise((r) => setTimeout(r, 900));
@@ -177,9 +192,9 @@ export function Contact() {
           {/* Contact info */}
           <div className="flex flex-col gap-6">
             {[
-              { icon: Phone, label: "Phone", value: siteConfig.phone, href: `tel:${siteConfig.phoneRaw}` },
-              { icon: Mail, label: "Email", value: siteConfig.email, href: `mailto:${siteConfig.email}` },
-              { icon: MapPin, label: "Location", value: siteConfig.location },
+              { icon: Phone, label: "Phone", value: config.phone, href: `tel:${config.phoneRaw}` },
+              { icon: Mail, label: "Email", value: config.email, href: `mailto:${config.email}` },
+              { icon: MapPin, label: "Location", value: config.location },
               { icon: Clock, label: "Response Time", value: "Within 24 hours" },
             ].map((item) => (
               <motion.div
@@ -300,6 +315,15 @@ export function Contact() {
                     <p className="text-xs text-destructive">{errors.service.message}</p>
                   )}
                 </div>
+
+                {selectedService === "Video Editing" && (
+                  <div className="sm:col-span-2 animate-fadeIn">
+                    <ShortsThumbnailSelector
+                      onSelectThumbnail={setSelectedThumbnail}
+                      selectedThumbnail={selectedThumbnail}
+                    />
+                  </div>
+                )}
 
                 <div className="flex flex-col gap-2 sm:col-span-2">
                   <Label htmlFor="message">Project Details</Label>

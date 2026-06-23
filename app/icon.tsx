@@ -22,7 +22,7 @@ export default function Icon() {
             width: 48,
             height: 48,
             borderRadius: "50%",
-            border: "2px solid #F7A500",
+            border: "2px solid #D4AF37",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -34,7 +34,7 @@ export default function Icon() {
               fontSize: 22,
               fontWeight: 700,
               letterSpacing: -1,
-              color: "#F7A500",
+              color: "#D4AF37",
             }}
           >
             DK

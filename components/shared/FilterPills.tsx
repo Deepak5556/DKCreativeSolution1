@@ -56,7 +56,7 @@ export function FilterPills({
                     className="absolute inset-0 rounded-full"
                     style={{
                       background:
-                        "linear-gradient(135deg, #D4AF37 0%, #F5E27A 50%, #B8860B 100%)",
+                        "linear-gradient(135deg, #D4AF37 0%, #E6C65C 40%, #F4D76A 70%, #FFD700 100%)",
                       boxShadow: "0 2px 16px rgba(212,175,55,0.35)",
                     }}
                     initial={{ opacity: 0 }}

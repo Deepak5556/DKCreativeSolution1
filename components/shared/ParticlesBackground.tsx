@@ -8,13 +8,13 @@ interface Particle {
   r: number;
   vy: number;
   vx: number;
-  hue: "gold" | "silver";
+  hue: "purple" | "silver" | "gold";
   twinkle: number;
   twinkleSpeed: number;
 }
 
 /**
- * A lightweight canvas particle field — small gold/silver motes drifting
+ * A lightweight canvas particle field — small purple/silver motes drifting
  * upward — used as ambient texture behind the hero and CTA sections.
  * Rendered once, fixed behind all content, pointer-events disabled.
  * Falls back to a static frame when the user prefers reduced motion.
@@ -64,8 +64,8 @@ export function ParticlesBackground({ density = 70 }: { density?: number }) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fillStyle =
-          p.hue === "gold"
-            ? `rgba(247, 165, 0, ${Math.max(alpha, 0.08)})`
+          (p.hue === "purple" || p.hue === "gold")
+            ? `rgba(212, 175, 55, ${Math.max(alpha, 0.08)})`
             : `rgba(214, 208, 203, ${Math.max(alpha * 0.7, 0.06)})`;
         ctx.fill();
 

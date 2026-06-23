@@ -16,6 +16,7 @@ const VALID_TYPES = [
   "process",
   "features",
   "queries",
+  "site_settings",
 ];
 
 async function checkAuth(): Promise<boolean> {

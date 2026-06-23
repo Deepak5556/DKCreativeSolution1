@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { SiteSettingsPanel } from "@/components/admin/SiteSettingsPanel";
 import {
   Plus,
   Trash2,
@@ -34,6 +35,7 @@ import {
   LayoutGrid,
   LayoutList,
   ChevronDown,
+  Settings,
 } from "lucide-react";
 import { AVAILABLE_ICONS, resolveIcon } from "@/lib/icons";
 
@@ -50,7 +52,8 @@ type ContentType =
   | "testimonials"
   | "process"
   | "features"
-  | "queries";
+  | "queries"
+  | "site_settings";
 
 interface AdminItem {
   id: string;
@@ -102,6 +105,7 @@ const tabIcons: Record<ContentType, React.ComponentType<{ className?: string }>>
   process: ListChecks,
   features: Shield,
   queries: Inbox,
+  site_settings: Settings,
 };
 
 export default function AdminPage() {
@@ -139,6 +143,31 @@ export default function AdminPage() {
   const [tempFiles, setTempFiles] = useState<Record<string, { file: File; blobUrl: string }>>({});
   const [isSaving, setIsSaving] = useState(false);
 
+  const detectVideoDuration = useCallback((url: string) => {
+    if (!url || typeof window === "undefined") return;
+
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.onloadedmetadata = () => {
+      const durationSec = video.duration;
+      if (!isNaN(durationSec) && durationSec !== Infinity) {
+        const h = Math.floor(durationSec / 3600);
+        const m = Math.floor((durationSec % 3600) / 60);
+        const s = Math.floor(durationSec % 60);
+        const formattedS = s < 10 ? `0${s}` : s;
+        const formatted = h > 0 
+          ? `${h}:${m < 10 ? `0${m}` : m}:${formattedS}` 
+          : `${m}:${formattedS}`;
+        setFormFields((prev) => ({ ...prev, duration: formatted }));
+        toast.success(`Video duration automatically detected: ${formatted}`);
+      }
+    };
+    video.onerror = () => {
+      console.log("Could not auto-detect duration for video source:", url);
+    };
+    video.src = url;
+  }, []);
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, fieldKey: keyof AdminItem) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -156,6 +185,10 @@ export default function AdminPage() {
 
     handleFieldChange(fieldKey, blobUrl);
     toast.success(`${file.name} ready for saving!`);
+
+    if (fieldKey === "videoUrl") {
+      detectVideoDuration(blobUrl);
+    }
   };
 
   const handleCancel = useCallback(() => {
@@ -655,6 +688,7 @@ export default function AdminPage() {
               { id: "process", label: "Process Steps" },
               { id: "features", label: "Why Us (Features)" },
               { id: "queries", label: "Inquiries / Leads" },
+              { id: "site_settings", label: "Site Settings" },
             ] as const
           ).map((tab) => {
             const IconComponent = tabIcons[tab.id];
@@ -702,17 +736,23 @@ export default function AdminPage() {
         <header className="p-6 border-b border-white/5 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold font-display tracking-tight text-white capitalize">
-              {activeTab === "dashboard" ? "System Dashboard" : `${activeTab} management`}
+              {activeTab === "dashboard"
+                ? "System Dashboard"
+                : activeTab === "site_settings"
+                ? "Site Settings"
+                : `${activeTab} management`}
             </h2>
             <p className="text-[10px] text-dk-muted mt-0.5">
               {activeTab === "dashboard"
                 ? "Overview of website performance and dynamic content details."
+                : activeTab === "site_settings"
+                ? "Manage your studio details, contact info, and social media links."
                 : `Modify, configure, or review your dynamic website ${activeTab} items.`}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            {activeTab !== "dashboard" && activeTab !== "queries" && (
+            {activeTab !== "dashboard" && activeTab !== "queries" && activeTab !== "site_settings" && (
               <button
                 onClick={openAddModal}
                 className="flex items-center gap-1.5 rounded-full bg-gold-gradient px-4 py-2.5 text-xs font-bold text-dk-bg shadow-glow-sm hover:scale-105 transition-transform"
@@ -1054,7 +1094,7 @@ export default function AdminPage() {
           )}
 
           {/* DYNAMIC CONTENT TABLE LISTS */}
-          {activeTab !== "dashboard" && (
+          {activeTab !== "dashboard" && activeTab !== "site_settings" && (
             <div className="relative rounded-2xl border border-white/5 bg-[#0b0b0b]/40 p-6 backdrop-blur-md">
               <div className="mb-6 flex items-center justify-between">
                 <div>
@@ -1648,6 +1688,11 @@ export default function AdminPage() {
               )}
             </div>
           )}
+
+          {/* SITE SETTINGS TAB */}
+          {activeTab === "site_settings" && (
+            <SiteSettingsPanel />
+          )}
         </div>
       </main>
 
@@ -1980,15 +2025,15 @@ export default function AdminPage() {
 
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
-                        Duration
+                        Duration (Auto-calculated)
                       </label>
                       <input
                         type="text"
                         required
+                        readOnly
                         value={formFields.duration || ""}
-                        onChange={(e) => handleFieldChange("duration", e.target.value)}
-                        placeholder="0:30"
-                        className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none"
+                        placeholder="Auto-detected on upload/pasting link"
+                        className="rounded-lg border border-white/10 bg-white/[0.01] px-3 py-2 text-sm text-white/50 focus:outline-none cursor-not-allowed opacity-70"
                       />
                     </div>
                   </div>
@@ -2020,7 +2065,11 @@ export default function AdminPage() {
                       <input
                         type="text"
                         value={formFields.videoUrl || ""}
-                        onChange={(e) => handleFieldChange("videoUrl", e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          handleFieldChange("videoUrl", val);
+                          detectVideoDuration(val);
+                        }}
                         placeholder="https://www.youtube.com/watch?v=... or /uploads/..."
                         className="flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none"
                       />

@@ -5,7 +5,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { Button } from "@/components/ui/button";
-import { NAV_LINKS, siteConfig } from "@/lib/constants";
+import { NAV_LINKS } from "@/lib/constants";
+import { useSiteConfig } from "@/components/shared/SiteConfigProvider";
 
 interface MobileNavProps {
   open: boolean;
@@ -13,6 +14,7 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ open, onOpenChange }: MobileNavProps) {
+  const config = useSiteConfig();
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <AnimatePresence>
@@ -75,10 +77,10 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
                     <a href="#contact">Hire Me</a>
                   </Button>
                   <a
-                    href={`tel:${siteConfig.phoneRaw}`}
+                    href={`tel:${config.phoneRaw}`}
                     className="text-center text-sm text-dk-muted hover:text-white"
                   >
-                    {siteConfig.phone}
+                    {config.phone}
                   </a>
                 </div>
               </motion.div>

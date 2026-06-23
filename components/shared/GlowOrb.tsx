@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 interface GlowOrbProps {
-  color?: "gold" | "silver";
+  color?: "purple" | "silver" | "gold";
   size?: number;
   className?: string;
   floatClassName?: string;
@@ -25,9 +25,9 @@ export function GlowOrb({
         width: size,
         height: size,
         background:
-          color === "gold"
-            ? "radial-gradient(circle, rgba(247,165,0,0.55) 0%, rgba(247,165,0,0) 70%)"
-            : "radial-gradient(circle, rgba(214,208,203,0.4) 0%, rgba(214,208,203,0) 70%)",
+          color === "silver"
+            ? "radial-gradient(circle, rgba(214,208,203,0.4) 0%, rgba(214,208,203,0) 70%)"
+            : "radial-gradient(circle, rgba(212,175,55,0.45) 0%, rgba(212,175,55,0) 70%)",
       }}
     />
   );

@@ -20,7 +20,7 @@ export function TestimonialCard({ testimonial }: TestimonialCardProps) {
             key={i}
             className="h-3.5 w-3.5"
             strokeWidth={0}
-            fill={i < testimonial.rating ? "#F7A500" : "#2a2a2a"}
+            fill={i < testimonial.rating ? "#D4AF37" : "#2a2a2a"}
           />
         ))}
       </div>

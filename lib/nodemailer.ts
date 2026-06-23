@@ -47,7 +47,7 @@ export async function sendOTPEmail(email: string, code: string) {
           border-radius: 16px;
           padding: 40px;
           text-align: center;
-          box-shadow: 0 8px 32px rgba(247, 165, 0, 0.08);
+          box-shadow: 0 8px 32px rgba(212, 175, 55, 0.08);
         }
         h1 {
           font-size: 22px;
@@ -57,17 +57,17 @@ export async function sendOTPEmail(email: string, code: string) {
           letter-spacing: -0.5px;
         }
         .gold-text {
-          color: #F7A500;
+          color: #D4AF37;
         }
         .code {
           font-size: 36px;
           font-weight: bold;
           letter-spacing: 8px;
-          color: #FFB800;
-          background-color: rgba(247, 165, 0, 0.04);
+          color: #F4D76A;
+          background-color: rgba(212, 175, 55, 0.04);
           padding: 16px 28px;
           border-radius: 12px;
-          border: 1px dashed rgba(247, 165, 0, 0.25);
+          border: 1px dashed rgba(212, 175, 55, 0.25);
           display: inline-block;
           margin: 28px 0;
           font-family: monospace, Courier, monospace;
@@ -150,10 +150,10 @@ export async function sendQueryNotificationEmail(queryItem: Record<string, unkno
           max-width: 600px;
           margin: 0 auto;
           background-color: #111111;
-          border: 1px solid rgba(247, 165, 0, 0.15);
+          border: 1px solid rgba(212, 175, 55, 0.15);
           border-radius: 16px;
           padding: 40px;
-          box-shadow: 0 8px 32px rgba(247, 165, 0, 0.08);
+          box-shadow: 0 8px 32px rgba(212, 175, 55, 0.08);
         }
         h1 {
           font-size: 22px;
@@ -164,7 +164,7 @@ export async function sendQueryNotificationEmail(queryItem: Record<string, unkno
           text-align: center;
         }
         .gold-text {
-          color: #F7A500;
+          color: #D4AF37;
         }
         table {
           width: 100%;
@@ -234,7 +234,7 @@ export async function sendQueryNotificationEmail(queryItem: Record<string, unkno
           </tr>
           <tr>
             <td class="label">Priority</td>
-            <td class="value" style="color: ${priority === "urgent" ? "#ff4d4d" : "#F7A500"}">${priority}</td>
+            <td class="value" style="color: ${priority === "urgent" ? "#ff4d4d" : "#D4AF37"}">${priority}</td>
           </tr>
         </table>
 

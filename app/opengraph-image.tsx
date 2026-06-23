@@ -18,7 +18,7 @@ export default function OpengraphImage() {
           justifyContent: "center",
           background: "#050505",
           backgroundImage:
-            "radial-gradient(circle at 20% 20%, rgba(247,165,0,0.25) 0%, rgba(5,5,5,0) 50%), radial-gradient(circle at 85% 80%, rgba(214,208,203,0.18) 0%, rgba(5,5,5,0) 50%)",
+            "radial-gradient(circle at 20% 20%, rgba(212,175,55,0.22) 0%, rgba(5,5,5,0) 50%), radial-gradient(circle at 85% 80%, rgba(214,208,203,0.18) 0%, rgba(5,5,5,0) 50%)",
           position: "relative",
         }}
       >
@@ -27,7 +27,7 @@ export default function OpengraphImage() {
             width: 110,
             height: 110,
             borderRadius: "50%",
-            border: "3px solid #F7A500",
+            border: "3px solid #D4AF37",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -35,7 +35,7 @@ export default function OpengraphImage() {
             background: "#0a0a0a",
           }}
         >
-          <span style={{ fontSize: 46, fontWeight: 700, color: "#F7A500", letterSpacing: -2 }}>
+          <span style={{ fontSize: 46, fontWeight: 700, color: "#D4AF37", letterSpacing: -2 }}>
             DK
           </span>
         </div>
@@ -82,7 +82,7 @@ export default function OpengraphImage() {
                   padding: "10px 22px",
                   borderRadius: 999,
                   border: "1px solid rgba(255,255,255,0.15)",
-                  color: "#FFB800",
+                  color: "#F4D76A",
                   fontSize: 18,
                 }}
               >

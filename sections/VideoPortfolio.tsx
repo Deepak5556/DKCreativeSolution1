@@ -171,7 +171,7 @@ export function VideoPortfolio() {
                         }}
                       />
                     ) : (
-                      <ArtworkTile seed={active.id} icon={Sparkles} accent="gold" className="h-full w-full" />
+                      <ArtworkTile seed={active.id} icon={Sparkles} accent="purple" className="h-full w-full" />
                     )}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                       <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
