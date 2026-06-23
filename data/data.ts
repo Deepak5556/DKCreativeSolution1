@@ -73,26 +73,26 @@ export const features: FeatureItem[] = [
 ];
 
 
-import type { PosterItem } from "@/types";
+// import type { PosterItem } from "@/types";
 
-export const posters: PosterItem[] = [
-  { id: "ig-01", title: "Festive Sale Carousel", category: "Instagram Posters", aspect: "square", palette: "gold", imageUrl: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=600&auto=format&fit=crop" },
-  { id: "ig-02", title: "Minimal Quote Post", category: "Instagram Posters", aspect: "square", palette: "silver", imageUrl: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=600&auto=format&fit=crop" },
-  { id: "ig-03", title: "Product Drop Teaser", category: "Instagram Posters", aspect: "story", palette: "mixed", imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop" },
-  { id: "ig-04", title: "Brand Anniversary Post", category: "Instagram Posters", aspect: "square", palette: "gold", imageUrl: "https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=600&auto=format&fit=crop" },
-  { id: "event-01", title: "Music Night Poster", category: "Event Posters", aspect: "portrait", palette: "mixed", imageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=600&auto=format&fit=crop" },
-  { id: "event-02", title: "Tech Meetup Poster", category: "Event Posters", aspect: "portrait", palette: "gold", imageUrl: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=600&auto=format&fit=crop" },
-  { id: "event-03", title: "Wedding Invite Poster", category: "Event Posters", aspect: "portrait", palette: "silver", imageUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=600&auto=format&fit=crop" },
-  { id: "promo-01", title: "Flash Sale Banner", category: "Promotional Posters", aspect: "square", palette: "gold", imageUrl: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=600&auto=format&fit=crop" },
-  { id: "promo-02", title: "App Launch Promo", category: "Promotional Posters", aspect: "story", palette: "mixed", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop" },
-  { id: "promo-03", title: "Festival Offer Poster", category: "Promotional Posters", aspect: "square", palette: "gold", imageUrl: "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?q=80&w=600&auto=format&fit=crop" },
-  { id: "biz-01", title: "Corporate Profile Card", category: "Business Posters", aspect: "square", palette: "silver", imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=600&auto=format&fit=crop" },
-  { id: "biz-02", title: "Service Rate Card", category: "Business Posters", aspect: "portrait", palette: "silver", imageUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=600&auto=format&fit=crop" },
-  { id: "biz-03", title: "Hiring Announcement", category: "Business Posters", aspect: "square", palette: "mixed", imageUrl: "https://images.unsplash.com/photo-1521791136368-1a851900d141?q=80&w=600&auto=format&fit=crop" },
-  { id: "event-04", title: "Workshop Poster", category: "Event Posters", aspect: "portrait", palette: "gold", imageUrl: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=600&auto=format&fit=crop" },
-  { id: "ig-05", title: "Testimonial Highlight", category: "Instagram Posters", aspect: "square", palette: "mixed", imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=600&auto=format&fit=crop" },
-  { id: "promo-04", title: "Black Friday Poster", category: "Promotional Posters", aspect: "square", palette: "silver", imageUrl: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=600&auto=format&fit=crop" },
-];
+// export const posters: PosterItem[] = [
+//   { id: "ig-01", title: "Festive Sale Carousel", category: "Instagram Posters", aspect: "square", palette: "gold", imageUrl: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=600&auto=format&fit=crop" },
+//   { id: "ig-02", title: "Minimal Quote Post", category: "Instagram Posters", aspect: "square", palette: "silver", imageUrl: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=600&auto=format&fit=crop" },
+//   { id: "ig-03", title: "Product Drop Teaser", category: "Instagram Posters", aspect: "story", palette: "mixed", imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop" },
+//   { id: "ig-04", title: "Brand Anniversary Post", category: "Instagram Posters", aspect: "square", palette: "gold", imageUrl: "https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=600&auto=format&fit=crop" },
+//   { id: "event-01", title: "Music Night Poster", category: "Event Posters", aspect: "portrait", palette: "mixed", imageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=600&auto=format&fit=crop" },
+//   { id: "event-02", title: "Tech Meetup Poster", category: "Event Posters", aspect: "portrait", palette: "gold", imageUrl: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=600&auto=format&fit=crop" },
+//   { id: "event-03", title: "Wedding Invite Poster", category: "Event Posters", aspect: "portrait", palette: "silver", imageUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=600&auto=format&fit=crop" },
+//   { id: "promo-01", title: "Flash Sale Banner", category: "Promotional Posters", aspect: "square", palette: "gold", imageUrl: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=600&auto=format&fit=crop" },
+//   { id: "promo-02", title: "App Launch Promo", category: "Promotional Posters", aspect: "story", palette: "mixed", imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop" },
+//   { id: "promo-03", title: "Festival Offer Poster", category: "Promotional Posters", aspect: "square", palette: "gold", imageUrl: "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?q=80&w=600&auto=format&fit=crop" },
+//   { id: "biz-01", title: "Corporate Profile Card", category: "Business Posters", aspect: "square", palette: "silver", imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=600&auto=format&fit=crop" },
+//   { id: "biz-02", title: "Service Rate Card", category: "Business Posters", aspect: "portrait", palette: "silver", imageUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=600&auto=format&fit=crop" },
+//   { id: "biz-03", title: "Hiring Announcement", category: "Business Posters", aspect: "square", palette: "mixed", imageUrl: "https://images.unsplash.com/photo-1521791136368-1a851900d141?q=80&w=600&auto=format&fit=crop" },
+//   { id: "event-04", title: "Workshop Poster", category: "Event Posters", aspect: "portrait", palette: "gold", imageUrl: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=600&auto=format&fit=crop" },
+//   { id: "ig-05", title: "Testimonial Highlight", category: "Instagram Posters", aspect: "square", palette: "mixed", imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=600&auto=format&fit=crop" },
+//   { id: "promo-04", title: "Black Friday Poster", category: "Promotional Posters", aspect: "square", palette: "silver", imageUrl: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=600&auto=format&fit=crop" },
+// ];
 
 export const posterCategories = [
   "All",
@@ -100,6 +100,7 @@ export const posterCategories = [
   "Event Posters",
   "Promotional Posters",
   "Business Posters",
+  "Before / After",
 ] as const;
 
 
@@ -398,24 +399,7 @@ export const videoItems: VideoItem[] = [
     videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-man-typing-on-a-keyboard-4054-large.mp4",
     thumbnailUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=600&auto=format&fit=crop"
   },
-  {
-    id: "color-grade-before-after",
-    title: "Cinematic Color Grade",
-    category: "Before / After",
-    duration: "0:15",
-    type: "before-after",
-    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-cinematic-shot-of-a-woman-walking-slowly-in-a-forest-41913-large.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop"
-  },
-  {
-    id: "audio-cleanup-before-after",
-    title: "Audio & Pacing Cleanup",
-    category: "Before / After",
-    duration: "0:20",
-    type: "before-after",
-    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-dj-adjusting-sound-on-audio-mixer-41611-large.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=600&auto=format&fit=crop"
-  },
+
   {
     id: "short-01",
     title: "Tech Tips Short",
@@ -457,7 +441,6 @@ export const videoItems: VideoItem[] = [
 export const videoFilters = [
   { id: "all", label: "All" },
   { id: "reel", label: "Reel Previews" },
-  { id: "before-after", label: "Before / After" },
   { id: "short", label: "YouTube Shorts" },
   { id: "motion-graphics", label: "Motion Graphics" },
 ] as const;

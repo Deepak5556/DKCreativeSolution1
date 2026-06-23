@@ -127,9 +127,10 @@ export async function POST(
 
     await writeData(type, updatedData);
     return NextResponse.json({ success: true, data: updatedData });
-  } catch {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to save data";
     return NextResponse.json(
-      { error: "Failed to save data" },
+      { error: message },
       { status: 500 }
     );
   }

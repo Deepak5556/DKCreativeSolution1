@@ -133,6 +133,10 @@ export async function writeData(type: string, data: unknown[]): Promise<void> {
     const { error } = await supabase.from(table).upsert(item);
     if (error) {
       console.error(`Error writing ${type} to Supabase:`, error);
+      // Throw so the API route can return an error response instead of silently failing
+      throw new Error(
+        `Database error: ${error.message || error.code || "Unknown Supabase error"}`
+      );
     }
   }
 }

@@ -17,24 +17,7 @@
     "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-man-typing-on-a-keyboard-4054-large.mp4",
     "thumbnailUrl": "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=600&auto=format&fit=crop"
   },
-  {
-    "id": "color-grade-before-after",
-    "title": "Cinematic Color Grade",
-    "category": "Before / After",
-    "duration": "0:15",
-    "type": "before-after",
-    "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-cinematic-shot-of-a-woman-walking-slowly-in-a-forest-41913-large.mp4",
-    "thumbnailUrl": "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop"
-  },
-  {
-    "id": "audio-cleanup-before-after",
-    "title": "Audio & Pacing Cleanup",
-    "category": "Before / After",
-    "duration": "0:20",
-    "type": "before-after",
-    "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-dj-adjusting-sound-on-audio-mixer-41611-large.mp4",
-    "thumbnailUrl": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=600&auto=format&fit=crop"
-  },
+
   {
     "id": "short-01",
     "title": "Tech Tips Short",

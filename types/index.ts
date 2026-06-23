@@ -30,7 +30,7 @@ export interface VideoItem {
   title: string;
   category: string;
   duration: string;
-  type: "reel" | "before-after" | "short" | "motion-graphics";
+  type: "reel" | "short" | "motion-graphics";
   videoUrl?: string;
   thumbnailUrl?: string;
 }
@@ -39,7 +39,8 @@ export type PosterCategory =
   | "Instagram Posters"
   | "Event Posters"
   | "Promotional Posters"
-  | "Business Posters";
+  | "Business Posters"
+  | "Before / After";
 
 export interface PosterItem {
   id: string;
@@ -48,6 +49,7 @@ export interface PosterItem {
   aspect: "square" | "portrait" | "story";
   palette: "gold" | "silver" | "mixed";
   imageUrl?: string;
+  beforeImageUrl?: string;
 }
 
 export interface FeatureItem {

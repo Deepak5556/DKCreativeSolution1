@@ -143,6 +143,20 @@
   .mask-fade-x {
     mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
   }
+
+  /* Hide scrollbar but keep scroll behaviour */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Smooth clip-path transitions for Before/After slider */
+  .clip-transition {
+    transition: clip-path 0.05s linear;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import { Play, Sparkles } from "lucide-react";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { VideoCard } from "@/components/shared/VideoCard";
-import { BeforeAfterSlider } from "@/components/shared/BeforeAfterSlider";
 import { ArtworkTile } from "@/components/shared/ArtworkTile";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -93,22 +92,14 @@ export function VideoPortfolio() {
       });
   }, []);
 
-  const beforeAfterItems = useMemo(
-    () => videosList.filter((v) => v.type === "before-after"),
-    [videosList]
-  );
-
   const gridItems = useMemo(
     () =>
       videosList.filter((v) => {
-        if (v.type === "before-after") return false;
         if (filter === "all") return true;
         return v.type === filter;
       }),
     [filter, videosList]
   );
-
-  const showBeforeAfter = filter === "all" || filter === "before-after";
 
   return (
     <section id="video-editing" className="relative bg-dk-bg py-24 sm:py-32">
@@ -131,14 +122,6 @@ export function VideoPortfolio() {
             </TabsList>
           </Tabs>
         </div>
-
-        {showBeforeAfter && (
-          <div className="mt-14 grid gap-8 sm:grid-cols-2">
-            {beforeAfterItems.map((video) => (
-              <BeforeAfterSlider key={video.id} video={video} />
-            ))}
-          </div>
-        )}
 
         {gridItems.length > 0 && (
           <motion.div

@@ -67,6 +67,7 @@ interface AdminItem {
   videoUrl?: string;
   thumbnailUrl?: string;
   imageUrl?: string;
+  beforeImageUrl?: string;
   actionType?: string;
   externalLink?: string;
   email?: string;
@@ -135,34 +136,36 @@ export default function AdminPage() {
 
   // Form Fields State
   const [formFields, setFormFields] = useState<Partial<AdminItem>>({});
-  const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [tempFiles, setTempFiles] = useState<Record<string, { file: File; blobUrl: string }>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldKey: keyof AdminItem) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, fieldKey: keyof AdminItem) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadingField(String(fieldKey));
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        handleFieldChange(fieldKey, data.url);
-        toast.success(`${file.name} uploaded successfully!`);
-      } else {
-        toast.error(data.error || "Upload failed");
+    const blobUrl = URL.createObjectURL(file);
+    setTempFiles((prev) => {
+      if (prev[String(fieldKey)]) {
+        URL.revokeObjectURL(prev[String(fieldKey)].blobUrl);
       }
-    } catch {
-      toast.error("Network error during file upload");
-    } finally {
-      setUploadingField(null);
-    }
+      return {
+        ...prev,
+        [String(fieldKey)]: { file, blobUrl },
+      };
+    });
+
+    handleFieldChange(fieldKey, blobUrl);
+    toast.success(`${file.name} ready for saving!`);
   };
+
+  const handleCancel = useCallback(() => {
+    Object.values(tempFiles).forEach((temp) => {
+      URL.revokeObjectURL(temp.blobUrl);
+    });
+    setTempFiles({});
+    setModalOpen(false);
+  }, [tempFiles]);
+
 
   const loadDashboardStats = useCallback(async () => {
     setLoadingStats(true);
@@ -362,6 +365,7 @@ export default function AdminPage() {
       defaults.aspect = "square";
       defaults.palette = "gold";
       defaults.imageUrl = "";
+      defaults.beforeImageUrl = "";
     } else if (targetTab === "stats") {
       defaults.id = generateUUID();
       defaults.value = 0;
@@ -388,6 +392,8 @@ export default function AdminPage() {
       defaults.icon = "Zap";
     }
     setFormFields(defaults);
+    setTempFiles({});
+    setIsSaving(false);
     setModalOpen(true);
   };
 
@@ -403,14 +409,45 @@ export default function AdminPage() {
       fields.tech = item.tech.join(", ");
     }
     setFormFields(fields);
+    setTempFiles({});
+    setIsSaving(false);
     setModalOpen(true);
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
 
     // Prepare item data (clean up comma separated strings to arrays if needed)
     const payloadItem = { ...formFields };
+
+    // Upload any pending files in tempFiles first
+    try {
+      for (const [fieldKey, temp] of Object.entries(tempFiles)) {
+        if (payloadItem[fieldKey as keyof AdminItem] === temp.blobUrl) {
+          const formData = new FormData();
+          formData.append("file", temp.file);
+
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            payloadItem[fieldKey as keyof AdminItem] = data.url;
+            URL.revokeObjectURL(temp.blobUrl);
+          } else {
+            throw new Error(data.error || `Upload failed for ${fieldKey}`);
+          }
+        }
+      }
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : "Failed to upload files";
+      toast.error(errMsg);
+      setIsSaving(false);
+      return;
+    }
+
     if (activeTab === "services" && typeof payloadItem.features === "string") {
       payloadItem.features = payloadItem.features
         .split(",")
@@ -443,6 +480,7 @@ export default function AdminPage() {
       const data = await res.json();
       if (res.ok && data.success) {
         toast.success(editingItem ? "Item updated!" : "Item created!");
+        setTempFiles({});
         setModalOpen(false);
         loadItems(activeTab);
         if (activeTab === "projects" || activeTab === "testimonials" || activeTab === "services" || activeTab === "stats") {
@@ -453,6 +491,8 @@ export default function AdminPage() {
       }
     } catch {
       toast.error("Form submit failed");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -686,6 +726,7 @@ export default function AdminPage() {
 
         {/* View Router Panel Container */}
         <div className="flex-1 p-6 lg:p-8 overflow-y-auto">
+
           {/* DASHBOARD TAB RENDERING */}
           {activeTab === "dashboard" && (
             <div className="space-y-8 animate-fadeIn">
@@ -1882,12 +1923,12 @@ export default function AdminPage() {
                         className="flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none"
                       />
                       <label className="flex cursor-pointer items-center justify-center rounded-lg border border-dashed border-white/20 bg-white/[0.02] px-4 text-xs font-semibold text-white hover:bg-white/5">
-                        {uploadingField === "thumbnailUrl" ? "Uploading..." : "Upload Image"}
+                        {isSaving ? "Saving..." : tempFiles["thumbnailUrl"] ? "Ready to Save" : "Upload Image"}
                         <input
                           type="file"
                           accept="image/*"
                           onChange={(e) => handleFileUpload(e, "thumbnailUrl")}
-                          disabled={uploadingField !== null}
+                          disabled={isSaving}
                           className="hidden"
                         />
                       </label>
@@ -1964,7 +2005,6 @@ export default function AdminPage() {
                         style={{ backgroundImage: 'none' }}
                       >
                         <option value="reel" className="bg-[#111111]">Reel Preview</option>
-                        <option value="before-after" className="bg-[#111111]">Before / After</option>
                         <option value="short" className="bg-[#111111]">YouTube Shorts</option>
                         <option value="motion-graphics" className="bg-[#111111]">Motion Graphics</option>
                       </select>
@@ -1985,12 +2025,12 @@ export default function AdminPage() {
                         className="flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none"
                       />
                       <label className="flex cursor-pointer items-center justify-center rounded-lg border border-dashed border-white/20 bg-white/[0.02] px-4 text-xs font-semibold text-white hover:bg-white/5">
-                        {uploadingField === "videoUrl" ? "Uploading..." : "Upload MP4"}
+                        {isSaving ? "Saving..." : tempFiles["videoUrl"] ? "Ready to Save" : "Upload MP4"}
                         <input
                           type="file"
                           accept="video/*"
                           onChange={(e) => handleFileUpload(e, "videoUrl")}
-                          disabled={uploadingField !== null}
+                          disabled={isSaving}
                           className="hidden"
                         />
                       </label>
@@ -2010,12 +2050,12 @@ export default function AdminPage() {
                         className="flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none"
                       />
                       <label className="flex cursor-pointer items-center justify-center rounded-lg border border-dashed border-white/20 bg-white/[0.02] px-4 text-xs font-semibold text-white hover:bg-white/5">
-                        {uploadingField === "thumbnailUrl" ? "Uploading..." : "Upload Image"}
+                        {isSaving ? "Saving..." : tempFiles["thumbnailUrl"] ? "Ready to Save" : "Upload Image"}
                         <input
                           type="file"
                           accept="image/*"
                           onChange={(e) => handleFileUpload(e, "thumbnailUrl")}
-                          disabled={uploadingField !== null}
+                          disabled={isSaving}
                           className="hidden"
                         />
                       </label>
@@ -2065,6 +2105,7 @@ export default function AdminPage() {
                         <option value="Event Posters" className="bg-[#111111]">Event Posters</option>
                         <option value="Promotional Posters" className="bg-[#111111]">Promotional Posters</option>
                         <option value="Business Posters" className="bg-[#111111]">Business Posters</option>
+                        <option value="Before / After" className="bg-[#111111]">Before / After</option>
                       </select>
                       <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dk-muted" />
                     </div>
@@ -2112,7 +2153,7 @@ export default function AdminPage() {
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
-                      Poster Image URL
+                      {formFields.category === "Before / After" ? "After Image URL" : "Poster Image URL"}
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -2123,12 +2164,12 @@ export default function AdminPage() {
                         className="flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none"
                       />
                       <label className="flex cursor-pointer items-center justify-center rounded-lg border border-dashed border-white/20 bg-white/[0.02] px-4 text-xs font-semibold text-white hover:bg-white/5">
-                        {uploadingField === "imageUrl" ? "Uploading..." : "Upload Poster"}
+                        {isSaving ? "Saving..." : tempFiles["imageUrl"] ? "Ready to Save" : "Upload Image"}
                         <input
                           type="file"
                           accept="image/*"
                           onChange={(e) => handleFileUpload(e, "imageUrl")}
-                          disabled={uploadingField !== null}
+                          disabled={isSaving}
                           className="hidden"
                         />
                       </label>
@@ -2137,13 +2178,50 @@ export default function AdminPage() {
                       <div className="relative mt-2 aspect-video w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
                         <Image
                           src={formFields.imageUrl}
-                          alt="Poster Preview"
+                          alt="After Preview"
                           fill
                           className="object-cover"
                         />
                       </div>
                     )}
                   </div>
+
+                  {formFields.category === "Before / After" && (
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
+                        Before Image URL
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={formFields.beforeImageUrl || ""}
+                          onChange={(e) => handleFieldChange("beforeImageUrl", e.target.value)}
+                          placeholder="https://images.unsplash.com/... or /uploads/..."
+                          className="flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none"
+                        />
+                        <label className="flex cursor-pointer items-center justify-center rounded-lg border border-dashed border-white/20 bg-white/[0.02] px-4 text-xs font-semibold text-white hover:bg-white/5">
+                          {isSaving ? "Saving..." : tempFiles["beforeImageUrl"] ? "Ready to Save" : "Upload Before"}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileUpload(e, "beforeImageUrl")}
+                            disabled={isSaving}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                      {formFields.beforeImageUrl && (
+                        <div className="relative mt-2 aspect-video w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
+                          <Image
+                            src={formFields.beforeImageUrl}
+                            alt="Before Preview"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
 
@@ -2420,16 +2498,19 @@ export default function AdminPage() {
               <div className="mt-4 flex items-center justify-end gap-3 border-t border-white/10 pt-4">
                 <button
                   type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="rounded-xl border border-white/15 px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-white/5"
+                  onClick={handleCancel}
+                  disabled={isSaving}
+                  className="rounded-xl border border-white/15 px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-white/5 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-gold-gradient px-4 py-2.5 text-xs font-bold text-dk-bg shadow-glow-sm transition-transform hover:-translate-y-0.5"
+                  disabled={isSaving}
+                  className="rounded-xl bg-gold-gradient px-4 py-2.5 text-xs font-bold text-dk-bg shadow-glow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-50 flex items-center gap-1.5"
                 >
-                  Save Changes
+                  {isSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  {isSaving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </form>

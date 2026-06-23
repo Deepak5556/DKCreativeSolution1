@@ -9,6 +9,7 @@ import { PageLoader } from "@/components/shared/PageLoader";
 import { supabase } from "@/lib/supabase";
 import { siteConfig as fallbackConfig } from "@/lib/constants";
 import { getOrganizationSchema, getWebsiteSchema } from "@/lib/schema";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const displayFont = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -143,6 +144,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main>{children}</main>
         <Footer />
         <Toaster />
+        <SpeedInsights />
       </body>
     </html>
   );

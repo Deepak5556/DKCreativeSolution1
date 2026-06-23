@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS public.videos (
     title TEXT NOT NULL,
     category TEXT NOT NULL,
     duration TEXT NOT NULL,
-    type TEXT NOT NULL CHECK (type IN ('reel', 'before-after', 'short', 'motion-graphics')),
+    type TEXT NOT NULL CHECK (type IN ('reel', 'short', 'motion-graphics')),
     video_url TEXT,
     thumbnail_url TEXT,
     order_idx INTEGER DEFAULT 0,
@@ -67,10 +67,11 @@ CREATE TABLE IF NOT EXISTS public.videos (
 CREATE TABLE IF NOT EXISTS public.posters (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title TEXT NOT NULL,
-    category TEXT NOT NULL CHECK (category IN ('Instagram Posters', 'Event Posters', 'Promotional Posters', 'Business Posters')),
+    category TEXT NOT NULL CHECK (category IN ('Instagram Posters', 'Event Posters', 'Promotional Posters', 'Business Posters', 'Before / After')),
     aspect TEXT NOT NULL CHECK (aspect IN ('square', 'portrait', 'story')),
     palette TEXT NOT NULL CHECK (palette IN ('gold', 'silver', 'mixed')),
     image_url TEXT,
+    before_image_url TEXT,
     order_idx INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
