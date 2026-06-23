@@ -80,6 +80,9 @@ export async function generateMetadata(): Promise<Metadata> {
         "max-video-preview": -1,
       },
     },
+    verification: {
+      google: "MwtG3rhwgRjuW5jvNT-nscDB1_ibIIbL5856et2JJGc",
+    },
     openGraph: {
       type: "website",
       locale: "en_US",

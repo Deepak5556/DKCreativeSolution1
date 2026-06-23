@@ -3,12 +3,12 @@
 import Image from "next/image";
 
 import { useMemo, useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Play, Sparkles } from "lucide-react";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { VideoCard } from "@/components/shared/VideoCard";
 import { ArtworkTile } from "@/components/shared/ArtworkTile";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterPills } from "@/components/shared/FilterPills";
 import {
   Dialog,
   DialogContent,
@@ -111,27 +111,38 @@ export function VideoPortfolio() {
           description="Reels, shorts, and motion graphics edited for retention — plus a look at the grade and pacing work behind the scenes."
         />
 
-        <div className="mt-10 flex justify-center">
-          <Tabs value={filter} onValueChange={setFilter}>
-            <TabsList>
-              {videoFilters.map((f) => (
-                <TabsTrigger key={f.id} value={f.id}>
-                  {f.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        </div>
+        <FilterPills
+          options={videoFilters.map((f) => ({ id: f.id, label: f.label }))}
+          active={filter}
+          onChange={setFilter}
+          layoutId="videos-filter-pill"
+          className="mt-10"
+        />
 
-        {gridItems.length > 0 && (
+        {gridItems.length > 0 ? (
           <motion.div
-            layout
+            key={filter}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="mt-14 grid grid-cols-1 gap-5 min-[480px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
           >
-            {gridItems.map((video, i) => (
-              <VideoCard key={video.id} video={video} index={i} onPlay={handleSetActive} />
-            ))}
+            <AnimatePresence mode="popLayout">
+              {gridItems.map((video, i) => (
+                <motion.div
+                  key={video.id}
+                  initial={{ opacity: 0, scale: 0.94 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.92 }}
+                  transition={{ duration: 0.3, delay: i * 0.04 }}
+                >
+                  <VideoCard video={video} index={i} onPlay={handleSetActive} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </motion.div>
+        ) : (
+          <p className="mt-20 text-center text-sm text-white/30">No videos in this category yet.</p>
         )}
       </div>
 

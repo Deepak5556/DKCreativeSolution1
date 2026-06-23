@@ -4,12 +4,14 @@ import { useMemo, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { ProjectCard } from "@/components/shared/ProjectCard";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterPills } from "@/components/shared/FilterPills";
 import { projectCategories } from "@/data/data";
 import { resolveIcon } from "@/lib/icons";
 import type { ProjectItem, ProjectCategory } from "@/types";
 
 type FilterValue = "All" | ProjectCategory;
+
+const filterOptions = projectCategories.map((cat) => ({ id: cat, label: cat }));
 
 export function Projects() {
   const [filter, setFilter] = useState<FilterValue>("All");
@@ -48,17 +50,13 @@ export function Projects() {
           description="A selection of products built end-to-end — from data model to final UI polish."
         />
 
-        <div className="mt-10 flex justify-center">
-          <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterValue)}>
-            <TabsList>
-              {projectCategories.map((cat) => (
-                <TabsTrigger key={cat} value={cat}>
-                  {cat}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        </div>
+        <FilterPills
+          options={filterOptions}
+          active={filter}
+          onChange={(v) => setFilter(v as FilterValue)}
+          layoutId="projects-filter-pill"
+          className="mt-10"
+        />
 
         <motion.div
           layout
@@ -69,13 +67,22 @@ export function Projects() {
               <motion.div
                 key={project.id}
                 layout
-                exit={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.94, y: 12 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.92 }}
+                transition={{ duration: 0.35, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
               >
                 <ProjectCard project={project} index={i} />
               </motion.div>
             ))}
           </AnimatePresence>
         </motion.div>
+
+        {filtered.length === 0 && (
+          <p className="mt-20 text-center text-sm text-white/30">
+            No projects in this category yet.
+          </p>
+        )}
       </div>
     </section>
   );

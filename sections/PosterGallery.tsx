@@ -5,8 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { PosterCard } from "@/components/shared/PosterCard";
 import { BeforeAfterImageSlider } from "@/components/shared/BeforeAfterImageSlider";
+import { FilterPills } from "@/components/shared/FilterPills";
 import { posterCategories } from "@/data/data";
 import type { PosterItem } from "@/types";
+
+const filterOptions = posterCategories.map((cat) => ({ id: cat, label: cat }));
 
 export function PosterGallery() {
   const [filter, setFilter] = useState<string>("All");
@@ -50,32 +53,13 @@ export function PosterGallery() {
           description="Instagram posts, event posters, promotions, and business collateral — all built on a consistent brand system."
         />
 
-        {/* ── Filter tabs — horizontally scrollable on mobile ── */}
-        <div className="mt-10 overflow-x-auto pb-1 hide-scrollbar">
-          <div className="flex min-w-max gap-2 px-px justify-center">
-            {posterCategories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setFilter(cat)}
-                className={`relative rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
-                  filter === cat
-                    ? "text-black"
-                    : "text-white/50 hover:text-white/80 bg-white/5 hover:bg-white/10"
-                }`}
-              >
-                {filter === cat && (
-                  <motion.span
-                    layoutId="poster-tab-pill"
-                    className="absolute inset-0 rounded-full z-0"
-                    style={{ background: "linear-gradient(135deg,#D4AF37,#F5E27A,#B8860B)" }}
-                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                  />
-                )}
-                <span className="relative z-10">{cat}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+        <FilterPills
+          options={filterOptions}
+          active={filter}
+          onChange={setFilter}
+          layoutId="posters-filter-pill"
+          className="mt-10"
+        />
 
         {/* ── Content ── */}
         <AnimatePresence mode="wait">
