@@ -4,14 +4,14 @@ import path from "path";
 const DB_DIR = path.join(process.cwd(), "data", "db");
 const SEED_FILE = path.join(process.cwd(), "supabase", "seed.sql");
 
-function escapeSql(str: string | null | undefined): string {
-  if (str === null || str === undefined) return "NULL";
-  return "'" + str.replace(/'/g, "''") + "'";
+function escapeSql(val: unknown): string {
+  if (val === null || val === undefined) return "NULL";
+  return "'" + String(val).replace(/'/g, "''") + "'";
 }
 
-function escapeArray(arr: string[] | null | undefined): string {
-  if (!arr || arr.length === 0) return "'{}'";
-  const escaped = arr.map(item => `"${item.replace(/"/g, '""')}"`).join(",");
+function escapeArray(arr: unknown): string {
+  if (!arr || !Array.isArray(arr) || arr.length === 0) return "'{}'";
+  const escaped = arr.map(item => `"${String(item).replace(/"/g, '""')}"`).join(",");
   return `'{${escaped}}'`;
 }
 
@@ -23,7 +23,7 @@ function generateSeed() {
     const projects = JSON.parse(fs.readFileSync(path.join(DB_DIR, "projects.json"), "utf-8"));
     if (projects.length > 0) {
       sql += "INSERT INTO public.projects (category, title, description, tech, live_url, github_url, accent, icon, thumbnail_url, order_idx) VALUES\n";
-      sql += projects.map((p: any, i: number) => {
+      sql += projects.map((p: Record<string, unknown>, i: number) => {
         return `(${escapeSql(p.category)}, ${escapeSql(p.title)}, ${escapeSql(p.description)}, ${escapeArray(p.tech)}, ${escapeSql(p.liveUrl)}, ${escapeSql(p.githubUrl)}, ${escapeSql(p.accent)}, ${escapeSql(p.icon)}, ${escapeSql(p.thumbnailUrl)}, ${i})`;
       }).join(",\n") + ";\n\n";
     }
@@ -34,7 +34,7 @@ function generateSeed() {
     const videos = JSON.parse(fs.readFileSync(path.join(DB_DIR, "videos.json"), "utf-8"));
     if (videos.length > 0) {
       sql += "INSERT INTO public.videos (title, category, duration, type, video_url, thumbnail_url, order_idx) VALUES\n";
-      sql += videos.map((v: any, i: number) => {
+      sql += videos.map((v: Record<string, unknown>, i: number) => {
         return `(${escapeSql(v.title)}, ${escapeSql(v.category)}, ${escapeSql(v.duration)}, ${escapeSql(v.type)}, ${escapeSql(v.videoUrl)}, ${escapeSql(v.thumbnailUrl)}, ${i})`;
       }).join(",\n") + ";\n\n";
     }
@@ -45,7 +45,7 @@ function generateSeed() {
     const posters = JSON.parse(fs.readFileSync(path.join(DB_DIR, "posters.json"), "utf-8"));
     if (posters.length > 0) {
       sql += "INSERT INTO public.posters (title, category, aspect, palette, image_url, order_idx) VALUES\n";
-      sql += posters.map((p: any, i: number) => {
+      sql += posters.map((p: Record<string, unknown>, i: number) => {
         return `(${escapeSql(p.title)}, ${escapeSql(p.category)}, ${escapeSql(p.aspect)}, ${escapeSql(p.palette)}, ${escapeSql(p.imageUrl)}, ${i})`;
       }).join(",\n") + ";\n\n";
     }
@@ -56,7 +56,7 @@ function generateSeed() {
     const services = JSON.parse(fs.readFileSync(path.join(DB_DIR, "services.json"), "utf-8"));
     if (services.length > 0) {
       sql += "INSERT INTO public.services (title, description, features, action_type, external_link, icon, order_idx) VALUES\n";
-      sql += services.map((s: any, i: number) => {
+      sql += services.map((s: Record<string, unknown>, i: number) => {
         return `(${escapeSql(s.title)}, ${escapeSql(s.description)}, ${escapeArray(s.features)}, ${escapeSql(s.actionType)}, ${escapeSql(s.externalLink)}, ${escapeSql(s.icon)}, ${i})`;
       }).join(",\n") + ";\n\n";
     }
@@ -67,7 +67,7 @@ function generateSeed() {
     const testimonials = JSON.parse(fs.readFileSync(path.join(DB_DIR, "testimonials.json"), "utf-8"));
     if (testimonials.length > 0) {
       sql += "INSERT INTO public.testimonials (name, role, company, quote, rating, initials, order_idx) VALUES\n";
-      sql += testimonials.map((t: any, i: number) => {
+      sql += testimonials.map((t: Record<string, unknown>, i: number) => {
         return `(${escapeSql(t.name)}, ${escapeSql(t.role)}, ${escapeSql(t.company)}, ${escapeSql(t.quote)}, ${t.rating || 5}, ${escapeSql(t.initials)}, ${i})`;
       }).join(",\n") + ";\n\n";
     }
@@ -78,7 +78,7 @@ function generateSeed() {
     const features = JSON.parse(fs.readFileSync(path.join(DB_DIR, "features.json"), "utf-8"));
     if (features.length > 0) {
       sql += "INSERT INTO public.features (title, description, icon, order_idx) VALUES\n";
-      sql += features.map((f: any, i: number) => {
+      sql += features.map((f: Record<string, unknown>, i: number) => {
         return `(${escapeSql(f.title)}, ${escapeSql(f.description)}, ${escapeSql(f.icon)}, ${i})`;
       }).join(",\n") + ";\n\n";
     }
@@ -89,7 +89,7 @@ function generateSeed() {
     const process = JSON.parse(fs.readFileSync(path.join(DB_DIR, "process.json"), "utf-8"));
     if (process.length > 0) {
       sql += "INSERT INTO public.process_steps (step, title, description, icon, order_idx) VALUES\n";
-      sql += process.map((p: any, i: number) => {
+      sql += process.map((p: Record<string, unknown>, i: number) => {
         return `(${escapeSql(p.step)}, ${escapeSql(p.title)}, ${escapeSql(p.description)}, ${escapeSql(p.icon)}, ${i})`;
       }).join(",\n") + ";\n\n";
     }
@@ -100,7 +100,7 @@ function generateSeed() {
     const stats = JSON.parse(fs.readFileSync(path.join(DB_DIR, "stats.json"), "utf-8"));
     if (stats.length > 0) {
       sql += "INSERT INTO public.stats (value, suffix, label, order_idx) VALUES\n";
-      sql += stats.map((s: any, i: number) => {
+      sql += stats.map((s: Record<string, unknown>, i: number) => {
         return `(${s.value}, ${escapeSql(s.suffix)}, ${escapeSql(s.label)}, ${i})`;
       }).join(",\n") + ";\n\n";
     }

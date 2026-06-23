@@ -33,7 +33,7 @@ async function migrateImages() {
     const bucket = "project-images";
 
     console.log(`Uploading ${file} to ${bucket}...`);
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from(bucket)
       .upload(file, buffer, {
         upsert: true,

@@ -51,10 +51,11 @@ export function Services() {
       .catch((err) => console.error("Error loading services:", err));
   }, []);
 
-  // Set default category when modal opens
-  useEffect(() => {
-    if (activeQuoteService) {
-      const title = activeQuoteService.title.toLowerCase();
+  // Handle selecting a service and opening the modal
+  const handleSelectQuote = (service: ServiceItem | null) => {
+    setActiveQuoteService(service);
+    if (service) {
+      const title = service.title.toLowerCase();
       if (title.includes("web") || title.includes("portfolio")) {
         setCategory("Web Development");
         setSubCategory("Full Stack Web App");
@@ -81,7 +82,7 @@ export function Services() {
       setEnteredCode("");
       setShowVerifyStep(false);
     }
-  }, [activeQuoteService]);
+  };
 
   // Handle category drop down change to pre-fill dynamic subCategory default
   const handleCategoryChange = (val: string) => {
@@ -190,14 +191,14 @@ export function Services() {
               key={service.id}
               service={service}
               index={i}
-              onSelectQuote={setActiveQuoteService}
+              onSelectQuote={handleSelectQuote}
             />
           ))}
         </div>
       </div>
 
       {/* Lead Capture Dialog Form */}
-      <Dialog open={!!activeQuoteService} onOpenChange={(open) => !open && setActiveQuoteService(null)}>
+      <Dialog open={!!activeQuoteService} onOpenChange={(open) => !open && handleSelectQuote(null)}>
         <DialogContent className="max-w-md bg-black border-white/10 text-white max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white font-display text-xl font-bold">

@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { motion } from "framer-motion";
 import { Image as ImageIcon, Maximize2 } from "lucide-react";
 import { ArtworkTile } from "@/components/shared/ArtworkTile";
@@ -40,10 +42,11 @@ export function PosterCard({ poster, index }: PosterCardProps) {
           className={`group relative mb-4 block w-full overflow-hidden rounded-2xl border border-white/10 border-glow-hover ${aspectClass[poster.aspect]}`}
         >
           {poster.imageUrl ? (
-            <img
+            <Image
               src={poster.imageUrl}
               alt={poster.title}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
           ) : (
             <ArtworkTile
@@ -64,10 +67,11 @@ export function PosterCard({ poster, index }: PosterCardProps) {
       <DialogContent className="max-w-md bg-black border-white/10 text-white">
         <div className={`relative mb-4 w-full overflow-hidden rounded-xl bg-neutral-900 ${aspectClass[poster.aspect]}`}>
           {poster.imageUrl ? (
-            <img
+            <Image
               src={poster.imageUrl}
               alt={poster.title}
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
             />
           ) : (
             <ArtworkTile

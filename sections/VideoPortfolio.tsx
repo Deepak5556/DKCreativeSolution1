@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Play, Sparkles } from "lucide-react";
@@ -68,6 +70,16 @@ export function VideoPortfolio() {
   const [filter, setFilter] = useState<string>("all");
   const [active, setActive] = useState<VideoItem | null>(null);
   const [videosList, setVideosList] = useState<VideoItem[]>([]);
+  const [previewHasError, setPreviewHasError] = useState(false);
+  const [previewFallbackSrc, setPreviewFallbackSrc] = useState<string | null>(null);
+
+  const handleSetActive = (video: VideoItem | null) => {
+    setActive(video);
+    setPreviewHasError(false);
+    setPreviewFallbackSrc(null);
+  };
+
+  const previewImgSrc = previewFallbackSrc || active?.thumbnailUrl || null;
 
   useEffect(() => {
     fetch("/api/content/videos")
@@ -131,13 +143,13 @@ export function VideoPortfolio() {
             className="mt-14 grid grid-cols-1 gap-5 min-[480px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
           >
             {gridItems.map((video, i) => (
-              <VideoCard key={video.id} video={video} index={i} onPlay={setActive} />
+              <VideoCard key={video.id} video={video} index={i} onPlay={handleSetActive} />
             ))}
           </motion.div>
         )}
       </div>
 
-      <Dialog open={!!active} onOpenChange={(open) => !open && setActive(null)}>
+      <Dialog open={!!active} onOpenChange={(open) => !open && handleSetActive(null)}>
         <DialogContent className={`bg-black border-white/10 text-white transition-all duration-300 ${active?.type === "reel" || active?.type === "short" ? "max-w-[350px] sm:max-w-[380px]" : "max-w-2xl"}`}>
           {active && (
             <>
@@ -146,11 +158,20 @@ export function VideoPortfolio() {
                   renderVideoPlayer(active.videoUrl)
                 ) : (
                   <>
-                    {active.thumbnailUrl ? (
-                      <img
-                        src={active.thumbnailUrl}
+                    {previewImgSrc && !previewHasError ? (
+                      <Image
+                        src={previewImgSrc}
                         alt={active.title}
-                        className="h-full w-full object-cover"
+                        fill
+                        className="object-cover"
+                        onError={() => {
+                          const fallback = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop";
+                          if (previewImgSrc !== fallback) {
+                            setPreviewFallbackSrc(fallback);
+                          } else {
+                            setPreviewHasError(true);
+                          }
+                        }}
                       />
                     ) : (
                       <ArtworkTile seed={active.id} icon={Sparkles} accent="gold" className="h-full w-full" />

@@ -168,8 +168,8 @@ export function Footer() {
             © {year} DK Creative Solutions. All rights reserved.
           </p>
           <p>
-            Designed &amp; built with <span className="text-primary">Next.js</span> by DK Creative
-            Solutions.
+            Designed &amp; built by <span className="text-primary">DK Creative
+            Solutions.</span> 
           </p>
         </div>
       </div>

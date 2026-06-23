@@ -36,11 +36,12 @@ async function verifySupabase() {
   let supabase;
   try {
     supabase = createClient(url, key);
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
     console.log("");
     console.log("2. Connection Status");
     console.log("- Connected / Not Connected: Not Connected [FAIL]");
-    console.log(`- Fatal Error initializing client: ${err.message}`);
+    console.log(`- Fatal Error initializing client: ${errorMsg}`);
     console.log("");
     console.log("Migration Readiness: Not Ready [FAIL]");
     return;
@@ -62,9 +63,10 @@ async function verifySupabase() {
       console.log("- Connected / Not Connected: Connected [PASS]");
       console.log(`- Test Query Response: ${JSON.stringify(data)}`);
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
     console.log("- Connected / Not Connected: Not Connected [FAIL]");
-    console.log(`- Fatal Error: ${err.message}`);
+    console.log(`- Fatal Error: ${errorMsg}`);
   }
 
   // Check buckets
@@ -87,8 +89,9 @@ async function verifySupabase() {
       missing.forEach(b => console.log(`  - ${b}`));
       if (missing.length === 0) console.log("  - None");
     }
-  } catch (err: any) {
-     console.log(`- Error checking buckets: ${err.message}`);
+  } catch (err: unknown) {
+     const errorMsg = err instanceof Error ? err.message : String(err);
+     console.log(`- Error checking buckets: ${errorMsg}`);
   }
 }
 

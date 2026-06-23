@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { motion } from "framer-motion";
 import { ExternalLink, Github } from "lucide-react";
 import { ArtworkTile } from "@/components/shared/ArtworkTile";
@@ -24,10 +26,11 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
       <div className="relative aspect-[16/10] overflow-hidden bg-neutral-900">
         <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
           {project.thumbnailUrl ? (
-            <img
+            <Image
               src={project.thumbnailUrl}
               alt={project.title}
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
             />
           ) : (
             <ArtworkTile

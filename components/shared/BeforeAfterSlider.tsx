@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useRef, useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { GitCompareArrows, CircleOff, Sparkles } from "lucide-react";
@@ -59,10 +61,11 @@ export function BeforeAfterSlider({ video }: BeforeAfterSliderProps) {
         {/* After (full, gold) */}
         <div className="absolute inset-0">
           {video.thumbnailUrl ? (
-            <img
+            <Image
               src={video.thumbnailUrl}
               alt="After edit"
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
             />
           ) : (
             <ArtworkTile seed={video.id + "-after"} icon={Sparkles} accent="gold" label="After" className="h-full w-full" />
@@ -76,10 +79,11 @@ export function BeforeAfterSlider({ video }: BeforeAfterSliderProps) {
         >
           {video.thumbnailUrl ? (
             <div style={{ width: containerWidth }} className="absolute inset-y-0 left-0 h-full">
-              <img
+              <Image
                 src={video.thumbnailUrl}
                 alt="Before edit"
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
           ) : (

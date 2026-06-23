@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -311,10 +313,23 @@ export default function AdminPage() {
   const openAddModal = (tabOverride?: ContentType | React.MouseEvent) => {
     setEditingItem(null);
     const targetTab = typeof tabOverride === "string" ? tabOverride : activeTab;
+    
+    // Generate RFC 4122 compliant UUID
+    const generateUUID = () => {
+      if (typeof crypto !== "undefined" && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    };
+
     // Initialize default fields based on targetTab
     const defaults: Partial<AdminItem> = {};
     if (targetTab === "services") {
-      defaults.id = "service-" + Date.now();
+      defaults.id = generateUUID();
       defaults.title = "";
       defaults.description = "";
       defaults.icon = "Code2";
@@ -322,7 +337,7 @@ export default function AdminPage() {
       defaults.actionType = "popup";
       defaults.externalLink = "";
     } else if (targetTab === "projects") {
-      defaults.id = "project-" + Date.now();
+      defaults.id = generateUUID();
       defaults.title = "";
       defaults.category = "Web Development";
       defaults.description = "";
@@ -333,7 +348,7 @@ export default function AdminPage() {
       defaults.icon = "GraduationCap";
       defaults.thumbnailUrl = "";
     } else if (targetTab === "videos") {
-      defaults.id = "video-" + Date.now();
+      defaults.id = generateUUID();
       defaults.title = "";
       defaults.category = "Reel Preview";
       defaults.duration = "0:30";
@@ -341,19 +356,19 @@ export default function AdminPage() {
       defaults.videoUrl = "";
       defaults.thumbnailUrl = "";
     } else if (targetTab === "posters") {
-      defaults.id = "poster-" + Date.now();
+      defaults.id = generateUUID();
       defaults.title = "";
       defaults.category = "Instagram Posters";
       defaults.aspect = "square";
       defaults.palette = "gold";
       defaults.imageUrl = "";
     } else if (targetTab === "stats") {
-      defaults.id = "stat-" + Date.now();
+      defaults.id = generateUUID();
       defaults.value = 0;
       defaults.suffix = "+";
       defaults.label = "";
     } else if (targetTab === "testimonials") {
-      defaults.id = "testimonial-" + Date.now();
+      defaults.id = generateUUID();
       defaults.name = "";
       defaults.role = "";
       defaults.company = "";
@@ -361,13 +376,13 @@ export default function AdminPage() {
       defaults.rating = 5;
       defaults.initials = "";
     } else if (targetTab === "process") {
-      defaults.id = "process-" + Date.now();
+      defaults.id = generateUUID();
       defaults.step = String(items.length + 1).padStart(2, "0");
       defaults.title = "";
       defaults.description = "";
       defaults.icon = "MessageCircle";
     } else if (targetTab === "features") {
-      defaults.id = "feature-" + Date.now();
+      defaults.id = generateUUID();
       defaults.title = "";
       defaults.description = "";
       defaults.icon = "Zap";
@@ -1129,11 +1144,11 @@ export default function AdminPage() {
                           {/* Thumbnail preview */}
                           <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-white/10 bg-neutral-900">
                             {item.thumbnailUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
+                              <Image
                                 src={item.thumbnailUrl}
-                                alt={item.title}
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                alt={item.title || "Project Thumbnail"}
+                                fill
+                                className="object-cover transition-transform duration-500 group-hover:scale-105"
                               />
                             ) : (
                               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-500/10 to-yellow-500/10 text-primary">
@@ -1254,11 +1269,11 @@ export default function AdminPage() {
                           {/* Thumbnail preview with play overlay */}
                           <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-white/10 bg-neutral-900 group">
                             {item.thumbnailUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
+                              <Image
                                 src={item.thumbnailUrl}
-                                alt={item.title}
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                alt={item.title || "Video Thumbnail"}
+                                fill
+                                className="object-cover transition-transform duration-500 group-hover:scale-105"
                               />
                             ) : (
                               <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-primary">
@@ -1327,11 +1342,11 @@ export default function AdminPage() {
                           {/* Poster preview */}
                           <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-white/10 bg-neutral-900">
                             {item.imageUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
+                              <Image
                                 src={item.imageUrl}
-                                alt={item.title}
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                alt={item.title || "Poster Image"}
+                                fill
+                                className="object-cover transition-transform duration-500 group-hover:scale-105"
                               />
                             ) : (
                               <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-primary">
@@ -1878,12 +1893,12 @@ export default function AdminPage() {
                       </label>
                     </div>
                     {formFields.thumbnailUrl && (
-                      <div className="mt-2 aspect-[16/10] w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                      <div className="relative mt-2 aspect-[16/10] w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
+                        <Image
                           src={formFields.thumbnailUrl}
                           alt="Project Thumbnail Preview"
-                          className="h-full w-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       </div>
                     )}
@@ -2006,12 +2021,12 @@ export default function AdminPage() {
                       </label>
                     </div>
                     {formFields.thumbnailUrl && (
-                      <div className="mt-2 aspect-video w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                      <div className="relative mt-2 aspect-video w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
+                        <Image
                           src={formFields.thumbnailUrl}
                           alt="Thumbnail Preview"
-                          className="h-full w-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       </div>
                     )}
@@ -2119,12 +2134,12 @@ export default function AdminPage() {
                       </label>
                     </div>
                     {formFields.imageUrl && (
-                      <div className="mt-2 aspect-video w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                      <div className="relative mt-2 aspect-video w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
+                        <Image
                           src={formFields.imageUrl}
                           alt="Poster Preview"
-                          className="h-full w-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       </div>
                     )}

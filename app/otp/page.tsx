@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { Loader2, CheckCircle2, MessageSquare, ArrowLeft, ShieldAlert, Mail } from "lucide-react";
+import { Loader2, CheckCircle2, ArrowLeft, ShieldAlert, Mail } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { GlowOrb } from "@/components/shared/GlowOrb";
 import { Button } from "@/components/ui/button";
