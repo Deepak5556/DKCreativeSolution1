@@ -27,7 +27,10 @@ export function Projects() {
           setProjectsList(resolved);
         }
       })
-      .catch((err) => console.error("Error loading projects:", err));
+      .catch((err) => console.error("Error loading projects:", err))
+      .finally(() => {
+        window.dispatchEvent(new CustomEvent("sectionLoaded", { detail: "projects" }));
+      });
   }, []);
 
   const filtered = useMemo(

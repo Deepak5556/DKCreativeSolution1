@@ -17,7 +17,10 @@ export function PosterGallery() {
       .then((data) => {
         if (Array.isArray(data)) setPostersList(data);
       })
-      .catch((err) => console.error("Error loading posters:", err));
+      .catch((err) => console.error("Error loading posters:", err))
+      .finally(() => {
+        window.dispatchEvent(new CustomEvent("sectionLoaded", { detail: "posters" }));
+      });
   }, []);
 
   const filtered = useMemo(

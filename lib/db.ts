@@ -33,7 +33,16 @@ export function toCamelCase<T>(val: T): T {
 
 export async function readData(type: string): Promise<unknown[]> {
   const table = type === "process" ? "process_steps" : type;
-  const { data, error } = await supabase.from(table).select("*").order("order_idx", { ascending: true });
+  const hasOrderIdx = !["queries", "blogs", "categories", "site_settings"].includes(type);
+
+  let query = supabase.from(table).select("*");
+  if (hasOrderIdx) {
+    query = query.order("order_idx", { ascending: true });
+  } else if (type === "queries" || type === "blogs") {
+    query = query.order("created_at", { ascending: false });
+  }
+
+  const { data, error } = await query;
   if (error) {
     console.error(`Error reading ${type} from Supabase:`, error);
     return [];
@@ -52,8 +61,14 @@ export async function readData(type: string): Promise<unknown[]> {
         if (Array.isArray(localData) && localData.length > 0) {
           // Write to Supabase
           await writeData(type, localData);
-          // Re-fetch to get correct records (including any database-generated UUIDs/IDs)
-          const { data: reFetched } = await supabase.from(table).select("*").order("order_idx", { ascending: true });
+          // Re-fetch to get correct records
+          let reFetchQuery = supabase.from(table).select("*");
+          if (hasOrderIdx) {
+            reFetchQuery = reFetchQuery.order("order_idx", { ascending: true });
+          } else if (type === "queries" || type === "blogs") {
+            reFetchQuery = reFetchQuery.order("created_at", { ascending: false });
+          }
+          const { data: reFetched } = await reFetchQuery;
           if (reFetched && reFetched.length > 0) {
             return toCamelCase(reFetched) as unknown[];
           }
@@ -72,6 +87,7 @@ export async function writeData(type: string, data: unknown[]): Promise<void> {
   if (!Array.isArray(data)) return;
 
   const table = type === "process" ? "process_steps" : type;
+  const hasOrderIdx = !["queries", "blogs", "categories", "site_settings"].includes(type);
   
   // Convert frontend camelCase data to database snake_case
   const snakeData = toSnakeCase(data) as Record<string, unknown>[];
@@ -105,7 +121,7 @@ export async function writeData(type: string, data: unknown[]): Promise<void> {
   // 3. Upsert the updated items
   for (let i = 0; i < snakeData.length; i++) {
     const itemData = snakeData[i];
-    const item = { ...itemData, order_idx: i } as Record<string, unknown>; // Maintain order
+    const item = (hasOrderIdx ? { ...itemData, order_idx: i } : { ...itemData }) as Record<string, unknown>;
     
     // If the ID is not a valid UUID (e.g. legacy 'project-1234' format or missing/empty),
     // remove the id property to let PostgreSQL generate a valid UUID on insert.

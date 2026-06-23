@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { readData, writeData } from "@/lib/db";
 import { cookies } from "next/headers";
 import { verifyOTPHash } from "@/lib/otp";
+import { sendQueryNotificationEmail } from "@/lib/nodemailer";
 
 export const dynamic = "force-dynamic";
 
@@ -99,6 +100,13 @@ export async function POST(
 
     if (action === "create") {
       updatedData.push(item);
+      if (type === "queries") {
+        try {
+          await sendQueryNotificationEmail(item as Record<string, unknown>);
+        } catch (emailErr) {
+          console.error("Failed to send query notification email:", emailErr);
+        }
+      }
     } else if (action === "update") {
       const typedItem = item as DataItem;
       updatedData = typedData.map((d) => (d.id === typedItem.id ? item : d));

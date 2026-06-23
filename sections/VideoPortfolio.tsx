@@ -87,7 +87,10 @@ export function VideoPortfolio() {
       .then((data) => {
         if (Array.isArray(data)) setVideosList(data);
       })
-      .catch((err) => console.error("Error loading videos:", err));
+      .catch((err) => console.error("Error loading videos:", err))
+      .finally(() => {
+        window.dispatchEvent(new CustomEvent("sectionLoaded", { detail: "videos" }));
+      });
   }, []);
 
   const beforeAfterItems = useMemo(

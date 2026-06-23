@@ -48,12 +48,26 @@ export function Services() {
           setServicesList(resolved);
         }
       })
-      .catch((err) => console.error("Error loading services:", err));
+      .catch((err) => console.error("Error loading services:", err))
+      .finally(() => {
+        window.dispatchEvent(new CustomEvent("sectionLoaded", { detail: "services" }));
+      });
   }, []);
 
   // Handle selecting a service and opening the modal
   const handleSelectQuote = (service: ServiceItem | null) => {
     setActiveQuoteService(service);
+    
+    // Reset all form inputs and verification states
+    setName("");
+    setEmail("");
+    setPhone("");
+    setDetails("");
+    setPriority("standard");
+    setOtpHash("");
+    setEnteredCode("");
+    setShowVerifyStep(false);
+
     if (service) {
       const title = service.title.toLowerCase();
       if (title.includes("web") || title.includes("portfolio")) {
@@ -72,15 +86,6 @@ export function Services() {
         setCategory("Other");
         setSubCategory("");
       }
-      // Reset details and timeline
-      setName("");
-      setEmail("");
-      setPhone("");
-      setPriority("1 Month");
-      setDetails("");
-      setOtpHash("");
-      setEnteredCode("");
-      setShowVerifyStep(false);
     }
   };
 
@@ -164,7 +169,7 @@ export function Services() {
       const data = await res.json();
       if (res.ok && data.success) {
         toast.success("Inquiry submitted! We will contact you soon.");
-        setActiveQuoteService(null);
+        handleSelectQuote(null);
       } else {
         toast.error(data.error || "Failed to submit inquiry");
       }

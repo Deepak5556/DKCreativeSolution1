@@ -8,27 +8,54 @@ export function PageLoader() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if the page is already loaded
-    const handleLoad = () => {
-      // Add a slight delay to ensure everything is rendered smoothly and to give a premium feel
-      const timer = setTimeout(() => {
-        setLoading(false);
-      }, 1200);
-      return () => clearTimeout(timer);
+    if (typeof window === "undefined") return;
+
+    const isHomepage = window.location.pathname === "/";
+    if (!isHomepage) {
+      // Normal behavior on subpages
+      const handleLoad = () => {
+        const timer = setTimeout(() => setLoading(false), 1000);
+        return () => clearTimeout(timer);
+      };
+      if (document.readyState === "complete") {
+        handleLoad();
+      } else {
+        window.addEventListener("load", handleLoad);
+        const fallback = setTimeout(handleLoad, 3000);
+        return () => {
+          window.removeEventListener("load", handleLoad);
+          clearTimeout(fallback);
+        };
+      }
+      return;
+    }
+
+    // Homepage logic: Wait for backend data sections to load
+    const required = ["services", "projects", "videos", "posters"];
+    const loaded = new Set<string>();
+
+    const handleSectionLoaded = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      if (required.includes(customEvent.detail)) {
+        loaded.add(customEvent.detail);
+        if (loaded.size >= required.length) {
+          // Extra buffer for exit transition feel
+          setTimeout(() => setLoading(false), 300);
+        }
+      }
     };
 
-    if (document.readyState === "complete") {
-      handleLoad();
-    } else {
-      window.addEventListener("load", handleLoad);
-      // Safety fallback to hide loader after 3.5 seconds
-      const fallback = setTimeout(handleLoad, 3500);
+    window.addEventListener("sectionLoaded", handleSectionLoaded);
 
-      return () => {
-        window.removeEventListener("load", handleLoad);
-        clearTimeout(fallback);
-      };
-    }
+    // Safety fallback (e.g. offline, database down) to hide loader after 5.5 seconds
+    const fallbackTimer = setTimeout(() => {
+      setLoading(false);
+    }, 5500);
+
+    return () => {
+      window.removeEventListener("sectionLoaded", handleSectionLoaded);
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   return (
