@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { ServiceCard } from "@/components/shared/ServiceCard";
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 
 import { resolveIcon } from "@/lib/icons";
 import type { ServiceItem } from "@/types";
@@ -15,6 +17,13 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function Services() {
   const [servicesList, setServicesList] = useState<ServiceItem[]>([]);
@@ -35,6 +44,64 @@ export function Services() {
   const [enteredCode, setEnteredCode] = useState("");
   const [showVerifyStep, setShowVerifyStep] = useState(false);
   const [sendingOtp, setSendingOtp] = useState(false);
+
+  // Validation Touched States
+  const [nameTouched, setNameTouched] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [phoneTouched, setPhoneTouched] = useState(false);
+
+  // Form Validation Helpers
+  const isNameValid = name.trim().length >= 3 && name.trim().length <= 50 && /^[a-zA-Z\s]+$/.test(name.trim());
+  const isPhoneValid = phone.length === 10 && /^[6-9]\d{9}$/.test(phone);
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isFormValid = isNameValid && isPhoneValid && isEmailValid;
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+    val = val.replace(/[^a-zA-Z\s]/g, "");
+    val = val.replace(/\s{2,}/g, " ");
+    if (val.startsWith(" ")) {
+      val = val.trimStart();
+    }
+    setName(val);
+    setNameTouched(true);
+  };
+
+  const handleNameBlur = () => {
+    setNameTouched(true);
+    setName(name.trim());
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+    val = val.replace(/\D/g, "");
+    if (val.length > 10) {
+      val = val.slice(0, 10);
+    }
+    setPhone(val);
+    setPhoneTouched(true);
+  };
+
+  const handlePhonePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData("text");
+    const cleanedText = pastedText.replace(/\D/g, "").slice(0, 10);
+    if (cleanedText) {
+      setPhone(cleanedText);
+      setPhoneTouched(true);
+    }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\s/g, "");
+    setEmail(val);
+    setEmailTouched(true);
+  };
+
+  const handleEmailBlur = () => {
+    setEmailTouched(true);
+    setEmail(email.trim());
+  };
 
   useEffect(() => {
     fetch("/api/content/services")
@@ -63,10 +130,15 @@ export function Services() {
     setEmail("");
     setPhone("");
     setDetails("");
-    setPriority("standard");
+    setPriority("1 Month");
     setOtpHash("");
     setEnteredCode("");
     setShowVerifyStep(false);
+
+    // Reset touched states
+    setNameTouched(false);
+    setEmailTouched(false);
+    setPhoneTouched(false);
 
     if (service) {
       const title = service.title.toLowerCase();
@@ -204,7 +276,7 @@ export function Services() {
 
       {/* Lead Capture Dialog Form */}
       <Dialog open={!!activeQuoteService} onOpenChange={(open) => !open && handleSelectQuote(null)}>
-        <DialogContent className="max-w-md bg-black border-white/10 text-white max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95%] max-w-md bg-[#050505] border-white/10 text-white max-h-[90vh] overflow-y-auto p-6 sm:p-8 rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-white font-display text-xl font-bold">
               Request a Quote
@@ -215,14 +287,14 @@ export function Services() {
           </DialogHeader>
 
           {showVerifyStep ? (
-            <form onSubmit={handleSubmitInquiry} className="flex flex-col gap-4 mt-2">
+            <form onSubmit={handleSubmitInquiry} className="flex flex-col gap-5 mt-2">
               <div className="flex flex-col gap-1.5 text-center py-2">
                 <p className="text-xs text-dk-muted leading-relaxed">
                   We have sent a 4-digit verification code to <span className="text-primary font-medium">{email}</span>. Please enter it below to complete your quote request.
                 </p>
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <label htmlFor="inquiry-otp" className="text-xs font-mono uppercase tracking-wider text-dk-muted text-center">
                   4-Digit Code
                 </label>
@@ -230,11 +302,14 @@ export function Services() {
                   id="inquiry-otp"
                   type="text"
                   maxLength={4}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   required
                   value={enteredCode}
                   onChange={(e) => setEnteredCode(e.target.value.replace(/\D/g, ""))}
                   placeholder="1234"
-                  className="text-center font-mono text-lg tracking-[0.2em] rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-white focus:border-primary/50 focus:outline-none"
+                  className="w-full h-12 text-center font-mono text-lg tracking-[0.2em] rounded-2xl border border-white/10 bg-[#0D0D0D] px-4 text-white placeholder:text-white/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_rgba(212,175,55,0.15)]"
+                  style={{ transition: "all 0.25s ease" }}
                 />
               </div>
 
@@ -242,18 +317,18 @@ export function Services() {
                 <button
                   type="button"
                   onClick={() => setShowVerifyStep(false)}
-                  className="rounded-xl border border-white/15 px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-white/5"
+                  className="rounded-2xl border border-white/15 h-12 px-6 text-sm font-semibold text-white transition-all duration-200 hover:bg-white/5 active:scale-95"
                 >
                   Back
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-xl bg-gold-gradient px-4 py-2.5 text-xs font-bold text-dk-bg shadow-glow-sm transition-transform hover:-translate-y-0.5"
+                  className="rounded-2xl bg-gold-gradient h-12 px-6 text-sm font-bold text-dk-bg shadow-glow-sm transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-none active:scale-95 flex items-center justify-center gap-2"
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin inline-block mr-1.5" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                       Submitting...
                     </>
                   ) : (
@@ -263,138 +338,237 @@ export function Services() {
               </div>
             </form>
           ) : (
-            <form onSubmit={handleSubmitInquiry} className="flex flex-col gap-4 mt-2">
+            <form onSubmit={handleSubmitInquiry} className="flex flex-col gap-5 mt-2">
               {/* Name */}
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <label htmlFor="inquiry-name" className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                   Full Name
                 </label>
-                <input
-                  id="inquiry-name"
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
-                  className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none"
-                />
+                <div className="relative">
+                  <input
+                    id="inquiry-name"
+                    type="text"
+                    required
+                    maxLength={50}
+                    value={name}
+                    onChange={handleNameChange}
+                    onBlur={handleNameBlur}
+                    placeholder="John Doe"
+                    className={cn(
+                      "w-full h-12 rounded-2xl border bg-[#0D0D0D] pl-4 pr-12 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed",
+                      nameTouched && !isNameValid
+                        ? "border-red-500/70 focus:border-red-500 focus:ring-red-500/20 focus:shadow-[0_0_12px_rgba(239,68,68,0.15)]"
+                        : nameTouched && isNameValid
+                        ? "border-emerald-500/70 focus:border-emerald-500 focus:ring-emerald-500/20 focus:shadow-[0_0_12px_rgba(16,185,129,0.15)]"
+                        : "border-white/10 hover:border-white/20 focus:border-primary focus:ring-primary/20 focus:shadow-[0_0_12px_rgba(212,175,55,0.15)]"
+                    )}
+                    style={{ transition: "all 0.25s ease" }}
+                  />
+                  {nameTouched && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                      {isNameValid ? (
+                        <CheckCircle2 className="h-5 w-5 text-emerald-500 animate-in fade-in zoom-in duration-200" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 text-red-500 animate-in fade-in zoom-in duration-200" />
+                      )}
+                    </div>
+                  )}
+                </div>
+                <AnimatePresence>
+                  {nameTouched && !isNameValid && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                      animate={{ opacity: 1, height: "auto", marginTop: 4 }}
+                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                      className="text-xs text-red-500 font-medium"
+                    >
+                      Please enter a valid full name (letters only).
+                    </motion.p>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Email & Phone */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="flex flex-col gap-1.5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="flex flex-col gap-2">
                   <label htmlFor="inquiry-email" className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                     Email Address
                   </label>
-                  <input
-                    id="inquiry-email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="john@example.com"
-                    className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      id="inquiry-email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={handleEmailChange}
+                      onBlur={handleEmailBlur}
+                      placeholder="john@example.com"
+                      className={cn(
+                        "w-full h-12 rounded-2xl border bg-[#0D0D0D] pl-4 pr-12 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed",
+                        emailTouched && !isEmailValid
+                          ? "border-red-500/70 focus:border-red-500 focus:ring-red-500/20 focus:shadow-[0_0_12px_rgba(239,68,68,0.15)]"
+                          : emailTouched && isEmailValid
+                          ? "border-emerald-500/70 focus:border-emerald-500 focus:ring-emerald-500/20 focus:shadow-[0_0_12px_rgba(16,185,129,0.15)]"
+                          : "border-white/10 hover:border-white/20 focus:border-primary focus:ring-primary/20 focus:shadow-[0_0_12px_rgba(212,175,55,0.15)]"
+                      )}
+                      style={{ transition: "all 0.25s ease" }}
+                    />
+                    {emailTouched && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        {isEmailValid ? (
+                          <CheckCircle2 className="h-5 w-5 text-emerald-500 animate-in fade-in zoom-in duration-200" />
+                        ) : (
+                          <AlertCircle className="h-5 w-5 text-red-500 animate-in fade-in zoom-in duration-200" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <AnimatePresence>
+                    {emailTouched && !isEmailValid && (
+                      <motion.p
+                        initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                        animate={{ opacity: 1, height: "auto", marginTop: 4 }}
+                        exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                        className="text-xs text-red-500 font-medium"
+                      >
+                        Enter a valid email address.
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
                 </div>
 
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2">
                   <label htmlFor="inquiry-phone" className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                     Phone Number
                   </label>
-                  <input
-                    id="inquiry-phone"
-                    type="tel"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+1 (555) 019-2834"
-                    className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      id="inquiry-phone"
+                      type="tel"
+                      inputMode="numeric"
+                      required
+                      value={phone}
+                      onChange={handlePhoneChange}
+                      onPaste={handlePhonePaste}
+                      onBlur={() => setPhoneTouched(true)}
+                      placeholder="+91 9876543210"
+                      className={cn(
+                        "w-full h-12 rounded-2xl border bg-[#0D0D0D] pl-4 pr-12 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed",
+                        phoneTouched && !isPhoneValid
+                          ? "border-red-500/70 focus:border-red-500 focus:ring-red-500/20 focus:shadow-[0_0_12px_rgba(239,68,68,0.15)]"
+                          : phoneTouched && isPhoneValid
+                          ? "border-emerald-500/70 focus:border-emerald-500 focus:ring-emerald-500/20 focus:shadow-[0_0_12px_rgba(16,185,129,0.15)]"
+                          : "border-white/10 hover:border-white/20 focus:border-primary focus:ring-primary/20 focus:shadow-[0_0_12px_rgba(212,175,55,0.15)]"
+                      )}
+                      style={{ transition: "all 0.25s ease" }}
+                    />
+                    {phoneTouched && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        {isPhoneValid ? (
+                          <CheckCircle2 className="h-5 w-5 text-emerald-500 animate-in fade-in zoom-in duration-200" />
+                        ) : (
+                          <AlertCircle className="h-5 w-5 text-red-500 animate-in fade-in zoom-in duration-200" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <AnimatePresence>
+                    {phoneTouched && !isPhoneValid && (
+                      <motion.p
+                        initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                        animate={{ opacity: 1, height: "auto", marginTop: 4 }}
+                        exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                        className="text-xs text-red-500 font-medium"
+                      >
+                        Enter a valid 10-digit Indian mobile number.
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
               {/* Category Dropdown */}
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="inquiry-category" className="text-xs font-mono uppercase tracking-wider text-dk-muted">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                   Project Category
                 </label>
-                <select
-                  id="inquiry-category"
-                  value={category}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none bg-black"
-                >
-                  <option value="Web Development">Web Development</option>
-                  <option value="Mobile Apps">Mobile Apps</option>
-                  <option value="Both (Web & Mobile)">Both (Web & Mobile)</option>
-                  <option value="Video Editing">Video Editing</option>
-                  <option value="Poster Design">Poster Design</option>
-                  <option value="UI/UX Design">UI/UX Design</option>
-                  <option value="Other">Other</option>
-                </select>
+                <Select value={category} onValueChange={handleCategoryChange}>
+                  <SelectTrigger id="inquiry-category">
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Web Development">Web Development</SelectItem>
+                    <SelectItem value="Mobile Apps">Mobile Apps</SelectItem>
+                    <SelectItem value="Both (Web & Mobile)">Both (Web & Mobile)</SelectItem>
+                    <SelectItem value="Video Editing">Video Editing</SelectItem>
+                    <SelectItem value="Poster Design">Poster Design</SelectItem>
+                    <SelectItem value="UI/UX Design">UI/UX Design</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Timeline Priority Dropdown */}
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="inquiry-priority" className="text-xs font-mono uppercase tracking-wider text-dk-muted">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                   Timeline / Priority
                 </label>
-                <select
-                  id="inquiry-priority"
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
-                  className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none bg-black"
-                >
-                  <option value="1 Month">1 Month</option>
-                  <option value="2 Months">2 Months</option>
-                  <option value="3 Months">3 Months</option>
-                  <option value="More than 3 Months">More than 3 Months</option>
-                </select>
+                <Select value={priority} onValueChange={setPriority}>
+                  <SelectTrigger id="inquiry-priority">
+                    <SelectValue placeholder="Select Timeline" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1 Month">1 Month</SelectItem>
+                    <SelectItem value="2 Months">2 Months</SelectItem>
+                    <SelectItem value="3 Months">3 Months</SelectItem>
+                    <SelectItem value="More than 3 Months">More than 3 Months</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Conditional Sub-Category options */}
               {(category === "Web Development" || category === "Mobile Apps" || category === "Both (Web & Mobile)") && (
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="inquiry-web-type" className="text-xs font-mono uppercase tracking-wider text-dk-muted">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                     Desired Platform/Type
                   </label>
-                  <select
-                    id="inquiry-web-type"
-                    value={subCategory}
-                    onChange={(e) => setSubCategory(e.target.value)}
-                    className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none bg-black"
-                  >
-                    <option value="Full Stack Web App">Full Stack Web App</option>
-                    <option value="iOS & Android Mobile App">iOS & Android Mobile App</option>
-                    <option value="E-commerce Website">E-commerce Website</option>
-                    <option value="Custom Software">Custom Software</option>
-                    <option value="Other">Other</option>
-                  </select>
+                  <Select value={subCategory} onValueChange={setSubCategory}>
+                    <SelectTrigger id="inquiry-web-type">
+                      <SelectValue placeholder="Select Platform Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Full Stack Web App">Full Stack Web App</SelectItem>
+                      <SelectItem value="iOS & Android Mobile App">iOS & Android Mobile App</SelectItem>
+                      <SelectItem value="E-commerce Website">E-commerce Website</SelectItem>
+                      <SelectItem value="Custom Software">Custom Software</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
 
               {category === "Video Editing" && (
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="inquiry-video-type" className="text-xs font-mono uppercase tracking-wider text-dk-muted">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                     Video Format
                   </label>
-                  <select
-                    id="inquiry-video-type"
-                    value={subCategory}
-                    onChange={(e) => setSubCategory(e.target.value)}
-                    className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none bg-black"
-                  >
-                    <option value="Reels / Shorts (Vertical)">Reels / Shorts (Vertical)</option>
-                    <option value="Full Form Video (Landscape)">Full Form Video (Landscape)</option>
-                    <option value="YouTube Video">YouTube Video</option>
-                    <option value="Promo / Ad Video">Promo / Ad Video</option>
-                    <option value="Other">Other</option>
-                  </select>
+                  <Select value={subCategory} onValueChange={setSubCategory}>
+                    <SelectTrigger id="inquiry-video-type">
+                      <SelectValue placeholder="Select Video Format" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Reels / Shorts (Vertical)">Reels / Shorts (Vertical)</SelectItem>
+                      <SelectItem value="Full Form Video (Landscape)">Full Form Video (Landscape)</SelectItem>
+                      <SelectItem value="YouTube Video">YouTube Video</SelectItem>
+                      <SelectItem value="Promo / Ad Video">Promo / Ad Video</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
 
               {/* Details */}
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <label htmlFor="inquiry-details" className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                   Additional Details
                 </label>
@@ -404,15 +578,16 @@ export function Services() {
                   onChange={(e) => setDetails(e.target.value)}
                   placeholder="Tell us more about your ideas, features, or design requirements..."
                   rows={3}
-                  className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white placeholder-white/20 focus:border-primary/50 focus:outline-none resize-none"
+                  className="w-full rounded-2xl border border-white/10 bg-[#0D0D0D] p-4 text-sm text-white placeholder:text-white/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_12px_rgba(212,175,55,0.15)] resize-none"
+                  style={{ transition: "all 0.25s ease" }}
                 />
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={submitting || sendingOtp}
-                className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-gold-gradient py-2.5 text-sm font-bold text-dk-bg shadow-glow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                disabled={!isFormValid || submitting || sendingOtp}
+                className="mt-2 h-12 w-full flex items-center justify-center gap-2 rounded-2xl bg-gold-gradient text-sm font-bold text-dk-bg shadow-glow-sm transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-none active:scale-95"
               >
                 {submitting || sendingOtp ? (
                   <>

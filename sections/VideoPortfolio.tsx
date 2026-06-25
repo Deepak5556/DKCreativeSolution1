@@ -160,6 +160,7 @@ export function VideoPortfolio() {
                         src={previewImgSrc}
                         alt={active.title}
                         fill
+                        sizes="(max-width: 480px) 100vw, 400px"
                         className="object-cover"
                         onError={() => {
                           const fallback = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop";

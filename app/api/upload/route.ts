@@ -52,10 +52,11 @@ export async function POST(request: NextRequest) {
       url: publicUrlData.publicUrl,
       name: file.name,
     });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("Upload error:", err);
+    const message = err instanceof Error ? err.message : "Failed to upload file";
     return NextResponse.json(
-      { error: "Failed to upload file" },
+      { error: message },
       { status: 500 }
     );
   }

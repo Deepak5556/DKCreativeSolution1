@@ -9,15 +9,21 @@ import { MobileNav } from "@/components/shared/MobileNav";
 import { Button } from "@/components/ui/button";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 import { NAV_LINKS } from "@/lib/constants";
+import { useSiteConfig } from "@/components/shared/SiteConfigProvider";
 
 export function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const scrollProgress = useScrollProgress();
+  const config = useSiteConfig();
 
   if (pathname?.startsWith("/admin")) {
     return null;
   }
+
+  const nameParts = config.name.split(" ");
+  const firstPart = nameParts.slice(0, -1).join(" ");
+  const lastPart = nameParts.slice(-1).join(" ");
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
@@ -28,10 +34,10 @@ export function Navbar() {
 
       <div className="glass mx-auto mt-0 border-b border-white/10 px-0">
         <div className="container flex h-20 items-center justify-between">
-          <a href="#home" className="flex items-center gap-3" aria-label="DK Creative Solutions home">
+          <a href="#home" className="flex items-center gap-3" aria-label={`${config.name} home`}>
             <Logo size={42} />
             <span className="hidden font-display text-lg font-semibold tracking-tight text-white sm:inline">
-              DK Creative <span className="text-gradient-gold">Solutions</span>
+              {firstPart} <span className="text-gradient-gold">{lastPart}</span>
             </span>
           </a>
 

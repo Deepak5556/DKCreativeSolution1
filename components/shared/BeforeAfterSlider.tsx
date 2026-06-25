@@ -65,6 +65,7 @@ export function BeforeAfterSlider({ video }: BeforeAfterSliderProps) {
               src={video.thumbnailUrl}
               alt="After edit"
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover"
             />
           ) : (
@@ -83,6 +84,7 @@ export function BeforeAfterSlider({ video }: BeforeAfterSliderProps) {
                 src={video.thumbnailUrl}
                 alt="Before edit"
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover"
               />
             </div>

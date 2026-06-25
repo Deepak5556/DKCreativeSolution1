@@ -6,31 +6,58 @@ import { Logo } from "@/components/shared/Logo";
 
 export function PageLoader() {
   const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const isHomepage = window.location.pathname === "/";
+    let progressInterval: NodeJS.Timeout;
+
+    // Smooth simulated progress count up
+    let currentProgress = 0;
+    const runProgressCountup = () => {
+      progressInterval = setInterval(() => {
+        if (currentProgress < 90) {
+          // Increment random steps for natural load simulation
+          currentProgress += Math.floor(Math.random() * 6) + 1;
+          setProgress(Math.min(currentProgress, 95));
+        }
+      }, 120);
+    };
+
+    runProgressCountup();
+
+    // Handlers to end loading smoothly
+    const completeLoading = () => {
+      clearInterval(progressInterval);
+      setProgress(100);
+      // Wait for progress circle to fill up completely, then fade out
+      setTimeout(() => {
+        setLoading(false);
+      }, 550);
+    };
+
     if (!isHomepage) {
-      // Normal behavior on subpages
+      // Subpages load simulation
       const handleLoad = () => {
-        const timer = setTimeout(() => setLoading(false), 1000);
-        return () => clearTimeout(timer);
+        completeLoading();
       };
       if (document.readyState === "complete") {
         handleLoad();
       } else {
         window.addEventListener("load", handleLoad);
-        const fallback = setTimeout(handleLoad, 3000);
+        const fallback = setTimeout(handleLoad, 2500);
         return () => {
           window.removeEventListener("load", handleLoad);
           clearTimeout(fallback);
+          clearInterval(progressInterval);
         };
       }
       return;
     }
 
-    // Homepage logic: Wait for backend data sections to load
+    // Homepage logic: Wait for backend data sections to fire load events
     const required = ["services", "projects", "videos", "posters"];
     const loaded = new Set<string>();
 
@@ -38,25 +65,35 @@ export function PageLoader() {
       const customEvent = e as CustomEvent<string>;
       if (required.includes(customEvent.detail)) {
         loaded.add(customEvent.detail);
+        
+        // Increase progress corresponding to loaded modules
+        const baseProgress = Math.floor((loaded.size / required.length) * 95);
+        if (baseProgress > currentProgress) {
+          currentProgress = baseProgress;
+          setProgress(currentProgress);
+        }
+
         if (loaded.size >= required.length) {
-          // Extra buffer for exit transition feel
-          setTimeout(() => setLoading(false), 300);
+          completeLoading();
         }
       }
     };
 
     window.addEventListener("sectionLoaded", handleSectionLoaded);
 
-    // Safety fallback (e.g. offline, database down) to hide loader after 5.5 seconds
+    // Safety fallback (e.g. offline, database down) to hide loader after 5 seconds
     const fallbackTimer = setTimeout(() => {
-      setLoading(false);
-    }, 5500);
+      completeLoading();
+    }, 5000);
 
     return () => {
       window.removeEventListener("sectionLoaded", handleSectionLoaded);
       clearTimeout(fallbackTimer);
+      clearInterval(progressInterval);
     };
   }, []);
+
+  const strokeDashoffset = 2 * Math.PI * 66 * (1 - progress / 100);
 
   return (
     <AnimatePresence>
@@ -67,28 +104,61 @@ export function PageLoader() {
           className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#050505] text-white"
         >
           {/* Engineering grid backdrop */}
-          <div className="absolute inset-0 bg-grid bg-grid-fade opacity-20 pointer-events-none animate-pulse" />
+          <div className="absolute inset-0 bg-grid bg-grid-fade opacity-[0.15] pointer-events-none" />
 
           {/* Central Monogram Widget */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1, transition: { duration: 0.6, ease: "easeOut" } }}
+            animate={{ scale: 1, opacity: 1, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }}
             exit={{ scale: 1.05, opacity: 0, transition: { duration: 0.5, ease: "easeIn" } }}
-            className="relative flex flex-col items-center gap-6"
+            className="relative flex flex-col items-center gap-8"
           >
-            {/* The circular animated logo monogram */}
-            <div className="relative p-4 rounded-full border border-white/5 bg-black/40 backdrop-blur-md shadow-glow-md">
-              <Logo size={100} animateRing={true} withRing={true} />
+            {/* Concentric rotating design rings */}
+            <div className="absolute inset-0 -m-8 rounded-full border border-dashed border-white/5 animate-[spin_60s_linear_infinite_reverse] pointer-events-none" />
+            <div className="absolute inset-0 -m-12 rounded-full border border-dashed border-white/[0.02] animate-[spin_90s_linear_infinite] pointer-events-none" />
+
+            <div className="relative p-6 rounded-full border border-white/5 bg-black/60 backdrop-blur-md shadow-glow-md flex items-center justify-center">
+              {/* Circular Progress Bar Ring */}
+              <svg className="absolute -inset-0.5 h-[136px] w-[136px] -rotate-90 pointer-events-none">
+                <circle
+                  cx="68"
+                  cy="68"
+                  r="66"
+                  className="stroke-white/[0.04]"
+                  strokeWidth="1.5"
+                  fill="transparent"
+                />
+                <circle
+                  cx="68"
+                  cy="68"
+                  r="66"
+                  className="stroke-primary"
+                  strokeWidth="1.5"
+                  fill="transparent"
+                  strokeDasharray={2 * Math.PI * 66}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                  style={{ transition: "stroke-dashoffset 0.25s cubic-bezier(0.16, 1, 0.3, 1)" }}
+                />
+              </svg>
+
+              {/* The circular animated logo monogram */}
+              <Logo size={88} animateRing={true} withRing={true} />
             </div>
 
-            {/* Premium Loading text */}
-            <div className="flex flex-col items-center gap-1.5 text-center">
-              <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-primary/80 animate-pulse">
-                Loading Studio
+            {/* Premium Loading text & percentage counter */}
+            <div className="flex flex-col items-center gap-2.5 text-center mt-2">
+              <span className="font-mono text-[11px] font-bold tracking-[0.25em] text-primary">
+                {String(Math.floor(progress)).padStart(2, "0")}%
               </span>
-              <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-dk-muted/65">
-                DK Creative Solutions
-              </span>
+              <div className="flex flex-col items-center gap-1">
+                <span className="font-mono text-[8px] uppercase tracking-[0.4em] text-white/80 animate-pulse">
+                  Calibrating Studio
+                </span>
+                <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-dk-muted/60">
+                  DK Creative Solutions
+                </span>
+              </div>
             </div>
           </motion.div>
         </motion.div>

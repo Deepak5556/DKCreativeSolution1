@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { SiteSettingsPanel } from "@/components/admin/SiteSettingsPanel";
+import { ChangeHistoryPanel } from "@/components/admin/ChangeHistoryPanel";
 import {
   Plus,
   Trash2,
@@ -34,10 +35,17 @@ import {
   SlidersHorizontal,
   LayoutGrid,
   LayoutList,
-  ChevronDown,
   Settings,
+  History,
 } from "lucide-react";
 import { AVAILABLE_ICONS, resolveIcon } from "@/lib/icons";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Admin credentials constants
 const ADMIN_EMAIL = "deepak@gmail.com";
@@ -53,7 +61,8 @@ type ContentType =
   | "process"
   | "features"
   | "queries"
-  | "site_settings";
+  | "site_settings"
+  | "change_history";
 
 interface AdminItem {
   id: string;
@@ -106,6 +115,7 @@ const tabIcons: Record<ContentType, React.ComponentType<{ className?: string }>>
   features: Shield,
   queries: Inbox,
   site_settings: Settings,
+  change_history: History,
 };
 
 export default function AdminPage() {
@@ -142,6 +152,52 @@ export default function AdminPage() {
   const [formFields, setFormFields] = useState<Partial<AdminItem>>({});
   const [tempFiles, setTempFiles] = useState<Record<string, { file: File; blobUrl: string }>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+
+  const uploadFileWithProgress = useCallback((file: File, bucket: string, fieldKey: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/api/upload");
+      
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress((prev) => ({ ...prev, [fieldKey]: percentComplete }));
+        }
+      };
+      
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const res = JSON.parse(xhr.responseText);
+            if (res.success && res.url) {
+              resolve(res.url);
+            } else {
+              reject(new Error(res.error || "Upload failed"));
+            }
+          } catch {
+            reject(new Error("Invalid response from upload server"));
+          }
+        } else {
+          try {
+            const res = JSON.parse(xhr.responseText);
+            reject(new Error(res.error || `Upload failed with status ${xhr.status}`));
+          } catch {
+            reject(new Error(`Upload failed with status ${xhr.status}`));
+          }
+        }
+      };
+      
+      xhr.onerror = () => {
+        reject(new Error("Network error during file upload"));
+      };
+      
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("bucket", bucket);
+      xhr.send(formData);
+    });
+  }, []);
 
   const detectVideoDuration = useCallback((url: string) => {
     if (!url || typeof window === "undefined") return;
@@ -172,6 +228,38 @@ export default function AdminPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // File type and size validations
+    if (fieldKey === "videoUrl") {
+      const allowedVideoTypes = ["video/mp4", "video/quicktime", "video/x-msvideo", "video/webm"];
+      const allowedExtensions = ["mp4", "mov", "avi", "webm"];
+      const fileExtension = file.name.split(".").pop()?.toLowerCase() || "";
+      
+      if (!allowedVideoTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+        toast.error("Unsupported video format. Please upload MP4, MOV, AVI, or WEBM.");
+        return;
+      }
+      
+      const maxVideoSize = 100 * 1024 * 1024; // 100MB
+      if (file.size > maxVideoSize) {
+        toast.error("Video file is too large. Max allowed size is 100MB.");
+        return;
+      }
+    } else {
+      // Image file validations
+      const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp", "svg"];
+      const fileExtension = file.name.split(".").pop()?.toLowerCase() || "";
+      if (!file.type.startsWith("image/") && !allowedExtensions.includes(fileExtension)) {
+        toast.error("Invalid image format. Please upload JPG, PNG, WEBP, GIF, or SVG.");
+        return;
+      }
+      
+      const maxImageSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxImageSize) {
+        toast.error("Image file is too large. Max allowed size is 10MB.");
+        return;
+      }
+    }
+
     const blobUrl = URL.createObjectURL(file);
     setTempFiles((prev) => {
       if (prev[String(fieldKey)]) {
@@ -196,6 +284,7 @@ export default function AdminPage() {
       URL.revokeObjectURL(temp.blobUrl);
     });
     setTempFiles({});
+    setEditingItem(null);
     setModalOpen(false);
   }, [tempFiles]);
 
@@ -458,26 +547,30 @@ export default function AdminPage() {
     try {
       for (const [fieldKey, temp] of Object.entries(tempFiles)) {
         if (payloadItem[fieldKey as keyof AdminItem] === temp.blobUrl) {
-          const formData = new FormData();
-          formData.append("file", temp.file);
-
-          const res = await fetch("/api/upload", {
-            method: "POST",
-            body: formData,
-          });
-          const data = await res.json();
-          if (res.ok && data.success) {
-            payloadItem[fieldKey as keyof AdminItem] = data.url;
-            URL.revokeObjectURL(temp.blobUrl);
-          } else {
-            throw new Error(data.error || `Upload failed for ${fieldKey}`);
+          let bucket = "project-images";
+          if (fieldKey === "videoUrl") {
+            bucket = "project-videos";
           }
+          
+          setUploadProgress((prev) => ({ ...prev, [fieldKey]: 0 }));
+          
+          const uploadedUrl = await uploadFileWithProgress(temp.file, bucket, fieldKey);
+          
+          (payloadItem as Record<string, string | undefined>)[fieldKey] = uploadedUrl;
+          URL.revokeObjectURL(temp.blobUrl);
+          
+          setUploadProgress((prev) => {
+            const next = { ...prev };
+            delete next[fieldKey];
+            return next;
+          });
         }
       }
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : "Failed to upload files";
       toast.error(errMsg);
       setIsSaving(false);
+      setUploadProgress({});
       return;
     }
 
@@ -514,6 +607,7 @@ export default function AdminPage() {
       if (res.ok && data.success) {
         toast.success(editingItem ? "Item updated!" : "Item created!");
         setTempFiles({});
+        setEditingItem(null);
         setModalOpen(false);
         loadItems(activeTab);
         if (activeTab === "projects" || activeTab === "testimonials" || activeTab === "services" || activeTab === "stats") {
@@ -522,8 +616,10 @@ export default function AdminPage() {
       } else {
         toast.error(data.error || "Operation failed");
       }
-    } catch {
-      toast.error("Form submit failed");
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : "Form submit failed";
+      console.error("Database save failed:", err);
+      toast.error(errMsg);
     } finally {
       setIsSaving(false);
     }
@@ -689,6 +785,7 @@ export default function AdminPage() {
               { id: "features", label: "Why Us (Features)" },
               { id: "queries", label: "Inquiries / Leads" },
               { id: "site_settings", label: "Site Settings" },
+              { id: "change_history", label: "Change History" },
             ] as const
           ).map((tab) => {
             const IconComponent = tabIcons[tab.id];
@@ -740,6 +837,8 @@ export default function AdminPage() {
                 ? "System Dashboard"
                 : activeTab === "site_settings"
                 ? "Site Settings"
+                : activeTab === "change_history"
+                ? "Change History Log"
                 : `${activeTab} management`}
             </h2>
             <p className="text-[10px] text-dk-muted mt-0.5">
@@ -747,12 +846,14 @@ export default function AdminPage() {
                 ? "Overview of website performance and dynamic content details."
                 : activeTab === "site_settings"
                 ? "Manage your studio details, contact info, and social media links."
+                : activeTab === "change_history"
+                ? "Review dynamic website content modification logs."
                 : `Modify, configure, or review your dynamic website ${activeTab} items.`}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            {activeTab !== "dashboard" && activeTab !== "queries" && activeTab !== "site_settings" && (
+            {activeTab !== "dashboard" && activeTab !== "queries" && activeTab !== "site_settings" && activeTab !== "change_history" && (
               <button
                 onClick={openAddModal}
                 className="flex items-center gap-1.5 rounded-full bg-gold-gradient px-4 py-2.5 text-xs font-bold text-dk-bg shadow-glow-sm hover:scale-105 transition-transform"
@@ -1094,7 +1195,7 @@ export default function AdminPage() {
           )}
 
           {/* DYNAMIC CONTENT TABLE LISTS */}
-          {activeTab !== "dashboard" && activeTab !== "site_settings" && (
+          {activeTab !== "dashboard" && activeTab !== "site_settings" && activeTab !== "change_history" && (
             <div className="relative rounded-2xl border border-white/5 bg-[#0b0b0b]/40 p-6 backdrop-blur-md">
               <div className="mb-6 flex items-center justify-between">
                 <div>
@@ -1124,22 +1225,22 @@ export default function AdminPage() {
                   </div>
                   <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
                     {/* Sort Dropdown (styled) */}
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-2.5 flex items-center pointer-events-none">
+                    <div className="relative flex items-center">
+                      <div className="absolute left-2.5 z-10 pointer-events-none">
                         <SlidersHorizontal className="h-3 w-3 text-dk-muted" />
                       </div>
-                      <select
+                      <Select
                         value={sortOrder}
-                        onChange={(e) => setSortOrder(e.target.value as "latest" | "oldest")}
-                        className="appearance-none pl-7 pr-7 py-2 text-xs rounded-lg border border-white/10 bg-[#111111] text-white focus:border-primary/50 focus:outline-none cursor-pointer transition-colors hover:border-white/20"
-                        style={{ backgroundImage: 'none' }}
+                        onValueChange={(val) => setSortOrder(val as "latest" | "oldest")}
                       >
-                        <option value="latest">Latest First</option>
-                        <option value="oldest">Oldest First</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
-                        <ChevronDown className="h-3 w-3 text-dk-muted" />
-                      </div>
+                        <SelectTrigger className="h-8 w-32 rounded-lg border border-white/10 bg-[#0D0D0D] pl-8 pr-3 py-1 text-xs focus:ring-1 focus:ring-primary/20 focus:border-primary">
+                          <SelectValue placeholder="Sort" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-lg bg-[#0D0D0D] border-white/10">
+                          <SelectItem value="latest" className="text-xs py-1.5 pl-6 rounded-md">Latest First</SelectItem>
+                          <SelectItem value="oldest" className="text-xs py-1.5 pl-6 rounded-md">Oldest First</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     {/* View Mode Toggle */}
@@ -1229,6 +1330,7 @@ export default function AdminPage() {
                                 src={item.thumbnailUrl}
                                 alt={item.title || "Project Thumbnail"}
                                 fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                               />
                             ) : (
@@ -1354,6 +1456,7 @@ export default function AdminPage() {
                                 src={item.thumbnailUrl}
                                 alt={item.title || "Video Thumbnail"}
                                 fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                               />
                             ) : (
@@ -1427,6 +1530,7 @@ export default function AdminPage() {
                                 src={item.imageUrl}
                                 alt={item.title || "Poster Image"}
                                 fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                               />
                             ) : (
@@ -1693,6 +1797,11 @@ export default function AdminPage() {
           {activeTab === "site_settings" && (
             <SiteSettingsPanel />
           )}
+
+          {/* CHANGE HISTORY TAB */}
+          {activeTab === "change_history" && (
+            <ChangeHistoryPanel />
+          )}
         </div>
       </main>
 
@@ -1754,21 +1863,21 @@ export default function AdminPage() {
                       <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                         Lucide Icon
                       </label>
-                      <div className="relative">
-                        <select
-                          value={formFields.icon || "Code2"}
-                          onChange={(e) => handleFieldChange("icon", e.target.value)}
-                          className="w-full appearance-none rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 pr-8 text-sm text-white focus:border-primary/50 focus:outline-none cursor-pointer hover:border-white/20 transition-colors"
-                          style={{ backgroundImage: 'none' }}
-                        >
+                      <Select
+                        value={formFields.icon || "Code2"}
+                        onValueChange={(val) => handleFieldChange("icon", val)}
+                      >
+                        <SelectTrigger className="rounded-2xl border-white/10 bg-[#0D0D0D] h-12 px-4 text-sm text-white">
+                          <SelectValue placeholder="Select Icon" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl bg-[#0D0D0D] border-white/10 max-h-60 overflow-y-auto">
                           {AVAILABLE_ICONS.map((ic) => (
-                            <option key={ic} value={ic} className="bg-[#111111]">
+                            <SelectItem key={ic} value={ic} className="rounded-xl">
                               {ic}
-                            </option>
+                            </SelectItem>
                           ))}
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dk-muted" />
-                      </div>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -1790,18 +1899,18 @@ export default function AdminPage() {
                       <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                         Action Behavior
                       </label>
-                      <div className="relative">
-                        <select
-                          value={formFields.actionType || "popup"}
-                          onChange={(e) => handleFieldChange("actionType", e.target.value)}
-                          className="w-full appearance-none rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 pr-8 text-sm text-white focus:border-primary/50 focus:outline-none cursor-pointer hover:border-white/20 transition-colors"
-                          style={{ backgroundImage: 'none' }}
-                        >
-                          <option value="popup" className="bg-[#111111]">Popup Quote Modal</option>
-                          <option value="link" className="bg-[#111111]">External URL Link</option>
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dk-muted" />
-                      </div>
+                      <Select
+                        value={formFields.actionType || "popup"}
+                        onValueChange={(val) => handleFieldChange("actionType", val)}
+                      >
+                        <SelectTrigger className="rounded-2xl border-white/10 bg-[#0D0D0D] h-12 px-4 text-sm text-white">
+                          <SelectValue placeholder="Select Behavior" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl bg-[#0D0D0D] border-white/10">
+                          <SelectItem value="popup" className="rounded-xl">Popup Quote Modal</SelectItem>
+                          <SelectItem value="link" className="rounded-xl">External URL Link</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -1844,37 +1953,37 @@ export default function AdminPage() {
                       <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                         Category
                       </label>
-                      <div className="relative">
-                        <select
-                          value={formFields.category || "Web Development"}
-                          onChange={(e) => handleFieldChange("category", e.target.value)}
-                          className="w-full appearance-none rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 pr-8 text-sm text-white focus:border-primary/50 focus:outline-none cursor-pointer hover:border-white/20 transition-colors"
-                          style={{ backgroundImage: 'none' }}
-                        >
-                          <option value="Web Development" className="bg-[#111111]">Web Development</option>
-                          <option value="Mobile Apps" className="bg-[#111111]">Mobile Apps</option>
-                          <option value="Both" className="bg-[#111111]">Both</option>
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dk-muted" />
-                      </div>
+                      <Select
+                        value={formFields.category || "Web Development"}
+                        onValueChange={(val) => handleFieldChange("category", val)}
+                      >
+                        <SelectTrigger className="rounded-2xl border-white/10 bg-[#0D0D0D] h-12 px-4 text-sm text-white">
+                          <SelectValue placeholder="Select Category" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl bg-[#0D0D0D] border-white/10">
+                          <SelectItem value="Web Development" className="rounded-xl">Web Development</SelectItem>
+                          <SelectItem value="Mobile Apps" className="rounded-xl">Mobile Apps</SelectItem>
+                          <SelectItem value="Both" className="rounded-xl">Both</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                         Accent Theme
                       </label>
-                      <div className="relative">
-                        <select
-                          value={formFields.accent || "gold"}
-                          onChange={(e) => handleFieldChange("accent", e.target.value)}
-                          className="w-full appearance-none rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 pr-8 text-sm text-white focus:border-primary/50 focus:outline-none cursor-pointer hover:border-white/20 transition-colors"
-                          style={{ backgroundImage: 'none' }}
-                        >
-                          <option value="gold" className="bg-[#111111]">Gold</option>
-                          <option value="silver" className="bg-[#111111]">Silver</option>
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dk-muted" />
-                      </div>
+                      <Select
+                        value={formFields.accent || "gold"}
+                        onValueChange={(val) => handleFieldChange("accent", val)}
+                      >
+                        <SelectTrigger className="rounded-2xl border-white/10 bg-[#0D0D0D] h-12 px-4 text-sm text-white">
+                          <SelectValue placeholder="Select Accent" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl bg-[#0D0D0D] border-white/10">
+                          <SelectItem value="gold" className="rounded-xl">Gold</SelectItem>
+                          <SelectItem value="silver" className="rounded-xl">Silver</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -1896,21 +2005,21 @@ export default function AdminPage() {
                       <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                         Lucide Icon
                       </label>
-                      <div className="relative">
-                        <select
-                          value={formFields.icon || "GraduationCap"}
-                          onChange={(e) => handleFieldChange("icon", e.target.value)}
-                          className="w-full appearance-none rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 pr-8 text-sm text-white focus:border-primary/50 focus:outline-none cursor-pointer hover:border-white/20 transition-colors"
-                          style={{ backgroundImage: 'none' }}
-                        >
+                      <Select
+                        value={formFields.icon || "GraduationCap"}
+                        onValueChange={(val) => handleFieldChange("icon", val)}
+                      >
+                        <SelectTrigger className="rounded-2xl border-white/10 bg-[#0D0D0D] h-12 px-4 text-sm text-white">
+                          <SelectValue placeholder="Select Icon" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl bg-[#0D0D0D] border-white/10 max-h-60 overflow-y-auto">
                           {AVAILABLE_ICONS.map((ic) => (
-                            <option key={ic} value={ic} className="bg-[#111111]">
+                            <SelectItem key={ic} value={ic} className="rounded-xl">
                               {ic}
-                            </option>
+                            </SelectItem>
                           ))}
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dk-muted" />
-                      </div>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div className="flex flex-col gap-1.5">
@@ -1978,12 +2087,21 @@ export default function AdminPage() {
                         />
                       </label>
                     </div>
+                    {uploadProgress["thumbnailUrl"] !== undefined && (
+                      <div className="w-full bg-white/10 rounded-full h-1.5 mt-1.5 overflow-hidden">
+                        <div
+                          className="bg-primary h-full transition-all duration-300"
+                          style={{ width: `${uploadProgress["thumbnailUrl"]}%` }}
+                        />
+                      </div>
+                    )}
                     {formFields.thumbnailUrl && (
                       <div className="relative mt-2 aspect-[16/10] w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
                         <Image
                           src={formFields.thumbnailUrl}
                           alt="Project Thumbnail Preview"
                           fill
+                          sizes="128px"
                           className="object-cover"
                         />
                       </div>
@@ -2030,10 +2148,10 @@ export default function AdminPage() {
                       <input
                         type="text"
                         required
-                        readOnly
                         value={formFields.duration || ""}
-                        placeholder="Auto-detected on upload/pasting link"
-                        className="rounded-lg border border-white/10 bg-white/[0.01] px-3 py-2 text-sm text-white/50 focus:outline-none cursor-not-allowed opacity-70"
+                        onChange={(e) => handleFieldChange("duration", e.target.value)}
+                        placeholder="e.g. 0:30 (Auto-detected if possible)"
+                        className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white focus:border-primary/50 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -2042,19 +2160,19 @@ export default function AdminPage() {
                     <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                       Video Type (Filter)
                     </label>
-                    <div className="relative">
-                      <select
+                      <Select
                         value={formFields.type || "reel"}
-                        onChange={(e) => handleFieldChange("type", e.target.value)}
-                        className="w-full appearance-none rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 pr-8 text-sm text-white focus:border-primary/50 focus:outline-none cursor-pointer hover:border-white/20 transition-colors"
-                        style={{ backgroundImage: 'none' }}
+                        onValueChange={(val) => handleFieldChange("type", val)}
                       >
-                        <option value="reel" className="bg-[#111111]">Reel Preview</option>
-                        <option value="short" className="bg-[#111111]">YouTube Shorts</option>
-                        <option value="motion-graphics" className="bg-[#111111]">Motion Graphics</option>
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dk-muted" />
-                    </div>
+                        <SelectTrigger className="rounded-2xl border-white/10 bg-[#0D0D0D] h-12 px-4 text-sm text-white">
+                          <SelectValue placeholder="Select Type" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl bg-[#0D0D0D] border-white/10">
+                          <SelectItem value="reel" className="rounded-xl">Reel Preview</SelectItem>
+                          <SelectItem value="short" className="rounded-xl">YouTube Shorts</SelectItem>
+                          <SelectItem value="motion-graphics" className="rounded-xl">Motion Graphics</SelectItem>
+                        </SelectContent>
+                      </Select>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
@@ -2084,6 +2202,14 @@ export default function AdminPage() {
                         />
                       </label>
                     </div>
+                    {uploadProgress["videoUrl"] !== undefined && (
+                      <div className="w-full bg-white/10 rounded-full h-1.5 mt-1.5 overflow-hidden">
+                        <div
+                          className="bg-primary h-full transition-all duration-300"
+                          style={{ width: `${uploadProgress["videoUrl"]}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col gap-1.5">
@@ -2109,12 +2235,21 @@ export default function AdminPage() {
                         />
                       </label>
                     </div>
+                    {uploadProgress["thumbnailUrl"] !== undefined && (
+                      <div className="w-full bg-white/10 rounded-full h-1.5 mt-1.5 overflow-hidden">
+                        <div
+                          className="bg-primary h-full transition-all duration-300"
+                          style={{ width: `${uploadProgress["thumbnailUrl"]}%` }}
+                        />
+                      </div>
+                    )}
                     {formFields.thumbnailUrl && (
                       <div className="relative mt-2 aspect-video w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
                         <Image
                           src={formFields.thumbnailUrl}
                           alt="Thumbnail Preview"
                           fill
+                          sizes="128px"
                           className="object-cover"
                         />
                       </div>
@@ -2143,21 +2278,21 @@ export default function AdminPage() {
                     <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                       Category
                     </label>
-                    <div className="relative">
-                      <select
+                      <Select
                         value={formFields.category || "Instagram Posters"}
-                        onChange={(e) => handleFieldChange("category", e.target.value)}
-                        className="w-full appearance-none rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 pr-8 text-sm text-white focus:border-primary/50 focus:outline-none cursor-pointer hover:border-white/20 transition-colors"
-                        style={{ backgroundImage: 'none' }}
+                        onValueChange={(val) => handleFieldChange("category", val)}
                       >
-                        <option value="Instagram Posters" className="bg-[#111111]">Instagram Posters</option>
-                        <option value="Event Posters" className="bg-[#111111]">Event Posters</option>
-                        <option value="Promotional Posters" className="bg-[#111111]">Promotional Posters</option>
-                        <option value="Business Posters" className="bg-[#111111]">Business Posters</option>
-                        <option value="Before / After" className="bg-[#111111]">Before / After</option>
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dk-muted" />
-                    </div>
+                        <SelectTrigger className="rounded-2xl border-white/10 bg-[#0D0D0D] h-12 px-4 text-sm text-white">
+                          <SelectValue placeholder="Select Category" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl bg-[#0D0D0D] border-white/10">
+                          <SelectItem value="Instagram Posters" className="rounded-xl">Instagram Posters</SelectItem>
+                          <SelectItem value="Event Posters" className="rounded-xl">Event Posters</SelectItem>
+                          <SelectItem value="Promotional Posters" className="rounded-xl">Promotional Posters</SelectItem>
+                          <SelectItem value="Business Posters" className="rounded-xl">Business Posters</SelectItem>
+                          <SelectItem value="Before / After" className="rounded-xl">Before / After</SelectItem>
+                        </SelectContent>
+                      </Select>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -2165,38 +2300,38 @@ export default function AdminPage() {
                       <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                         Aspect Ratio
                       </label>
-                      <div className="relative">
-                        <select
-                          value={formFields.aspect || "square"}
-                          onChange={(e) => handleFieldChange("aspect", e.target.value)}
-                          className="w-full appearance-none rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 pr-8 text-sm text-white focus:border-primary/50 focus:outline-none cursor-pointer hover:border-white/20 transition-colors"
-                          style={{ backgroundImage: 'none' }}
-                        >
-                          <option value="square" className="bg-[#111111]">Square (1:1)</option>
-                          <option value="portrait" className="bg-[#111111]">Portrait (4:5)</option>
-                          <option value="story" className="bg-[#111111]">Story (16:9)</option>
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dk-muted" />
-                      </div>
+                      <Select
+                        value={formFields.aspect || "square"}
+                        onValueChange={(val) => handleFieldChange("aspect", val)}
+                      >
+                        <SelectTrigger className="rounded-2xl border-white/10 bg-[#0D0D0D] h-12 px-4 text-sm text-white">
+                          <SelectValue placeholder="Select Aspect Ratio" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl bg-[#0D0D0D] border-white/10">
+                          <SelectItem value="square" className="rounded-xl">Square (1:1)</SelectItem>
+                          <SelectItem value="portrait" className="rounded-xl">Portrait (4:5)</SelectItem>
+                          <SelectItem value="story" className="rounded-xl">Story (16:9)</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                         Palette
                       </label>
-                      <div className="relative">
-                        <select
-                          value={formFields.palette || "gold"}
-                          onChange={(e) => handleFieldChange("palette", e.target.value)}
-                          className="w-full appearance-none rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 pr-8 text-sm text-white focus:border-primary/50 focus:outline-none cursor-pointer hover:border-white/20 transition-colors"
-                          style={{ backgroundImage: 'none' }}
-                        >
-                          <option value="gold" className="bg-[#111111]">Gold</option>
-                          <option value="silver" className="bg-[#111111]">Silver</option>
-                          <option value="mixed" className="bg-[#111111]">Mixed</option>
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dk-muted" />
-                      </div>
+                      <Select
+                        value={formFields.palette || "gold"}
+                        onValueChange={(val) => handleFieldChange("palette", val)}
+                      >
+                        <SelectTrigger className="rounded-2xl border-white/10 bg-[#0D0D0D] h-12 px-4 text-sm text-white">
+                          <SelectValue placeholder="Select Palette" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl bg-[#0D0D0D] border-white/10">
+                          <SelectItem value="gold" className="rounded-xl">Gold</SelectItem>
+                          <SelectItem value="silver" className="rounded-xl">Silver</SelectItem>
+                          <SelectItem value="mixed" className="rounded-xl">Mixed</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -2223,12 +2358,21 @@ export default function AdminPage() {
                         />
                       </label>
                     </div>
+                    {uploadProgress["imageUrl"] !== undefined && (
+                      <div className="w-full bg-white/10 rounded-full h-1.5 mt-1.5 overflow-hidden">
+                        <div
+                          className="bg-primary h-full transition-all duration-300"
+                          style={{ width: `${uploadProgress["imageUrl"]}%` }}
+                        />
+                      </div>
+                    )}
                     {formFields.imageUrl && (
                       <div className="relative mt-2 aspect-video w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
                         <Image
                           src={formFields.imageUrl}
                           alt="After Preview"
                           fill
+                          sizes="128px"
                           className="object-cover"
                         />
                       </div>
@@ -2259,12 +2403,21 @@ export default function AdminPage() {
                           />
                         </label>
                       </div>
+                      {uploadProgress["beforeImageUrl"] !== undefined && (
+                        <div className="w-full bg-white/10 rounded-full h-1.5 mt-1.5 overflow-hidden">
+                          <div
+                            className="bg-primary h-full transition-all duration-300"
+                            style={{ width: `${uploadProgress["beforeImageUrl"]}%` }}
+                          />
+                        </div>
+                      )}
                       {formFields.beforeImageUrl && (
                         <div className="relative mt-2 aspect-video w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
                           <Image
                             src={formFields.beforeImageUrl}
                             alt="Before Preview"
                             fill
+                            sizes="128px"
                             className="object-cover"
                           />
                         </div>
@@ -2390,21 +2543,21 @@ export default function AdminPage() {
                       <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                         Rating (1-5 Stars)
                       </label>
-                      <div className="relative">
-                        <select
-                          value={formFields.rating || 5}
-                          onChange={(e) => handleFieldChange("rating", e.target.value)}
-                          className="w-full appearance-none rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 pr-8 text-sm text-white focus:border-primary/50 focus:outline-none cursor-pointer hover:border-white/20 transition-colors"
-                          style={{ backgroundImage: 'none' }}
-                        >
-                          <option value="5" className="bg-[#111111]">5 Stars</option>
-                          <option value="4" className="bg-[#111111]">4 Stars</option>
-                          <option value="3" className="bg-[#111111]">3 Stars</option>
-                          <option value="2" className="bg-[#111111]">2 Stars</option>
-                          <option value="1" className="bg-[#111111]">1 Star</option>
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dk-muted" />
-                      </div>
+                      <Select
+                        value={String(formFields.rating || 5)}
+                        onValueChange={(val) => handleFieldChange("rating", Number(val))}
+                      >
+                        <SelectTrigger className="rounded-2xl border-white/10 bg-[#0D0D0D] h-12 px-4 text-sm text-white">
+                          <SelectValue placeholder="Select Rating" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl bg-[#0D0D0D] border-white/10">
+                          <SelectItem value="5" className="rounded-xl">5 Stars</SelectItem>
+                          <SelectItem value="4" className="rounded-xl">4 Stars</SelectItem>
+                          <SelectItem value="3" className="rounded-xl">3 Stars</SelectItem>
+                          <SelectItem value="2" className="rounded-xl">2 Stars</SelectItem>
+                          <SelectItem value="1" className="rounded-xl">1 Star</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -2445,21 +2598,21 @@ export default function AdminPage() {
                       <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                         Lucide Icon
                       </label>
-                      <div className="relative">
-                        <select
-                          value={formFields.icon || "MessageCircle"}
-                          onChange={(e) => handleFieldChange("icon", e.target.value)}
-                          className="w-full appearance-none rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 pr-8 text-sm text-white focus:border-primary/50 focus:outline-none cursor-pointer hover:border-white/20 transition-colors"
-                          style={{ backgroundImage: 'none' }}
-                        >
+                      <Select
+                        value={formFields.icon || "MessageCircle"}
+                        onValueChange={(val) => handleFieldChange("icon", val)}
+                      >
+                        <SelectTrigger className="rounded-2xl border-white/10 bg-[#0D0D0D] h-12 px-4 text-sm text-white">
+                          <SelectValue placeholder="Select Icon" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl bg-[#0D0D0D] border-white/10 max-h-60 overflow-y-auto">
                           {AVAILABLE_ICONS.map((ic) => (
-                            <option key={ic} value={ic} className="bg-[#111111]">
+                            <SelectItem key={ic} value={ic} className="rounded-xl">
                               {ic}
-                            </option>
+                            </SelectItem>
                           ))}
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dk-muted" />
-                      </div>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -2511,21 +2664,21 @@ export default function AdminPage() {
                     <label className="text-xs font-mono uppercase tracking-wider text-dk-muted">
                       Lucide Icon
                     </label>
-                    <div className="relative">
-                      <select
-                        value={formFields.icon || "Zap"}
-                        onChange={(e) => handleFieldChange("icon", e.target.value)}
-                        className="w-full appearance-none rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 pr-8 text-sm text-white focus:border-primary/50 focus:outline-none cursor-pointer hover:border-white/20 transition-colors"
-                        style={{ backgroundImage: 'none' }}
-                      >
+                    <Select
+                      value={formFields.icon || "Zap"}
+                      onValueChange={(val) => handleFieldChange("icon", val)}
+                    >
+                      <SelectTrigger className="rounded-2xl border-white/10 bg-[#0D0D0D] h-12 px-4 text-sm text-white">
+                        <SelectValue placeholder="Select Icon" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl bg-[#0D0D0D] border-white/10 max-h-60 overflow-y-auto">
                         {AVAILABLE_ICONS.map((ic) => (
-                          <option key={ic} value={ic} className="bg-[#111111]">
+                          <SelectItem key={ic} value={ic} className="rounded-xl">
                             {ic}
-                          </option>
+                          </SelectItem>
                         ))}
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-dk-muted" />
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="flex flex-col gap-1.5">

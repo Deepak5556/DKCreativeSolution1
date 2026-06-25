@@ -6,8 +6,14 @@ import { Logo } from "@/components/shared/Logo";
 import { GlowOrb } from "@/components/shared/GlowOrb";
 import { ParticlesBackground } from "@/components/shared/ParticlesBackground";
 import { Button } from "@/components/ui/button";
+import { useSiteConfig } from "@/components/shared/SiteConfigProvider";
 
 export function Hero() {
+  const config = useSiteConfig();
+  const taglineParts = config.tagline.split(" ");
+  const firstTagline = taglineParts.slice(0, -2).join(" ");
+  const lastTagline = taglineParts.slice(-2).join(" ");
+
   return (
     <section
       id="home"
@@ -55,8 +61,8 @@ export function Hero() {
           transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-4xl text-balance font-display text-4xl font-bold leading-[1.1] text-white sm:text-5xl md:text-6xl lg:text-7xl"
         >
-          Transforming Ideas Into{" "}
-          <span className="text-gradient-gold">Digital Experiences</span>
+          {firstTagline}{" "}
+          <span className="text-gradient-gold">{lastTagline}</span>
         </motion.h1>
 
         <motion.p
@@ -65,8 +71,7 @@ export function Hero() {
           transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="mt-6 max-w-2xl text-balance text-base leading-relaxed text-dk-muted sm:text-lg md:text-xl"
         >
-          Professional Web Development, Video Editing and Creative Design Solutions
-          for brands that want to look — and perform — a level above.
+          {config.description}
         </motion.p>
 
         <motion.div
