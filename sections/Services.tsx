@@ -256,10 +256,10 @@ export function Services() {
     <section id="services" className="relative bg-dk-bg py-24 sm:py-32">
       <div className="container">
         <SectionHeading
-          eyebrow="What I Do"
-          title="Services built for"
-          highlight="measurable impact"
-          description="From first wireframe to final export — a focused set of services, each handled end-to-end with the same attention to detail."
+          eyebrow="Expert Creative Services"
+          title="Professional Web Development &"
+          highlight="Design Solutions"
+          description="Premium website development, UI/UX design, SEO services, video editing, and digital marketing tailored to grow your business and increase search visibility."
         />
 
         <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

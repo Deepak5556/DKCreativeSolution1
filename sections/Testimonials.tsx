@@ -44,9 +44,10 @@ export function Testimonials() {
     <section id="testimonials" className="relative overflow-hidden bg-[#0a0a0a] py-24 sm:py-32">
       <div className="container">
         <SectionHeading
-          eyebrow="Client Reviews"
-          title="Words from people I've"
-          highlight="worked with"
+          eyebrow="Client Testimonials"
+          title="Reviews from Brands and"
+          highlight="Partners"
+          description="Read reviews from clients who have partnered with DK Creative Solutions for website design, digital marketing, and video editing."
         />
 
         <div className="relative mt-14">

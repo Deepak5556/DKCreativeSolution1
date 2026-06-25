@@ -29,10 +29,10 @@ export function WhyChooseUs() {
     <section className="relative bg-dk-bg py-24 sm:py-32">
       <div className="container">
         <SectionHeading
-          eyebrow="Why DK Creative Solutions"
-          title="A studio built around"
-          highlight="trust"
-          description="Six reasons clients come back for their second, third, and fourth project."
+          eyebrow="Why Partner With Us"
+          title="A Brand Identity & Web"
+          highlight="Development Studio"
+          description="DK Creative Solutions delivers high-performance websites, creative graphic designs, and custom SEO services with transparent communication."
         />
 
         <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

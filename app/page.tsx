@@ -38,9 +38,11 @@ const Contact = dynamic(() => import("@/sections/Contact").then((m) => m.Contact
 });
 
 export const metadata: Metadata = {
-  title: "Home",
+  title: {
+    absolute: "DK Creative Solutions | Web Development | Digital Marketing | SEO | Video Editing | UI/UX Design",
+  },
   description:
-    "Premium freelance website development, video editing, UI/UX design, and poster design — by DK Creative Solutions.",
+    "DK Creative Solutions offers professional web development, UI/UX design, SEO, digital marketing, video editing, graphic design, poster design, landing pages, portfolio websites, business websites, React development, Flutter development, and complete digital solutions for businesses and creators.",
 };
 
 export default function HomePage() {

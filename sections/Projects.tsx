@@ -44,10 +44,10 @@ export function Projects() {
     <section id="projects" className="relative bg-[#0a0a0a] py-24 sm:py-32">
       <div className="container">
         <SectionHeading
-          eyebrow="Featured Work"
-          title="Projects across web and"
-          highlight="mobile"
-          description="A selection of products built end-to-end — from data model to final UI polish."
+          eyebrow="Portfolio & Featured Work"
+          title="Custom Web Applications &"
+          highlight="Digital Projects"
+          description="Explore full-stack React and Flutter applications designed for responsiveness, page speed optimization, and seamless user experiences."
         />
 
         <FilterPills
@@ -80,7 +80,7 @@ export function Projects() {
 
         {filtered.length === 0 && (
           <p className="mt-20 text-center text-sm text-white/30">
-            No projects in this category yet.
+            No projects available yet.
           </p>
         )}
       </div>

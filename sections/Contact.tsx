@@ -182,10 +182,10 @@ export function Contact() {
 
       <div className="container relative">
         <SectionHeading
-          eyebrow="Get In Touch"
-          title="Let's build something"
-          highlight="exceptional"
-          description="Tell me a little about your project and I'll get back to you within 24 hours with next steps."
+          eyebrow="Start Your Project"
+          title="Let's Consult on Your"
+          highlight="Digital Goals"
+          description="Contact DK Creative Solutions for website design, digital marketing, video editing, and SEO services. I will reply within 24 hours."
         />
 
         <div className="mt-16 grid gap-10 lg:grid-cols-[1fr_1.4fr]">

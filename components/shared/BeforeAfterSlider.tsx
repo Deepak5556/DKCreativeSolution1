@@ -63,7 +63,7 @@ export function BeforeAfterSlider({ video }: BeforeAfterSliderProps) {
           {video.thumbnailUrl ? (
             <Image
               src={video.thumbnailUrl}
-              alt="After edit"
+              alt={`${video.title} - After video editing and color grading`}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover"
@@ -82,7 +82,7 @@ export function BeforeAfterSlider({ video }: BeforeAfterSliderProps) {
             <div style={{ width: containerWidth }} className="absolute inset-y-0 left-0 h-full">
               <Image
                 src={video.thumbnailUrl}
-                alt="Before edit"
+                alt={`${video.title} - Before video editing and color grading`}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover"

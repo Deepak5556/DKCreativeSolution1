@@ -29,10 +29,10 @@ export function Process() {
     <section id="process" className="relative bg-dk-bg py-24 sm:py-32">
       <div className="container">
         <SectionHeading
-          eyebrow="How It Works"
-          title="A process refined over"
-          highlight="50+ projects"
-          description="Five stages stand between a first message and a finished, shipped product."
+          eyebrow="My Web & Design Workflow"
+          title="Refined Development & Design"
+          highlight="Process"
+          description="A five-stage workflow structured for high performance, accessibility, and clean code optimization."
         />
 
         <div className="relative mt-20">

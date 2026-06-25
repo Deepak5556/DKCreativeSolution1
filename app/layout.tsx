@@ -8,7 +8,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { supabase } from "@/lib/supabase";
 import { siteConfig as fallbackConfig } from "@/lib/constants";
-import { getOrganizationSchema, getWebsiteSchema } from "@/lib/schema";
+import {
+  getOrganizationSchema,
+  getWebsiteSchema,
+  getBreadcrumbSchema,
+  getLocalBusinessSchema,
+  getServicesSchema,
+} from "@/lib/schema";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SiteConfigProvider } from "@/components/shared/SiteConfigProvider";
 
@@ -30,7 +36,7 @@ const monoFont = JetBrains_Mono({
   display: "swap",
 });
 
-export async function generateMetadata(): Promise<Metadata> {
+async function getSiteConfig() {
   let config = fallbackConfig;
   try {
     const { data } = await supabase.from("site_settings").select("*").limit(1).single();
@@ -48,12 +54,32 @@ export async function generateMetadata(): Promise<Metadata> {
         phoneRaw: data.phone_raw || config.phoneRaw,
         location: data.location || config.location,
         founder: data.founder || config.founder,
-        keywords: data.keywords && data.keywords.length ? data.keywords : config.keywords,
+        keywords: Array.from(new Set([
+          ...(data.keywords && data.keywords.length ? data.keywords : []),
+          ...fallbackConfig.keywords,
+        ])),
+        links: {
+          github: data.github_url || config.links.github,
+          linkedin: data.linkedin_url || config.links.linkedin,
+          instagram: data.instagram_url || config.links.instagram,
+          twitter: data.twitter_url || config.links.twitter,
+          youtube: data.youtube_url || config.links.youtube,
+          behance: data.behance_url || config.links.behance,
+          whatsapp: data.whatsapp_url || config.links.whatsapp,
+        },
       };
     }
   } catch (err) {
     console.error("Failed to fetch site config from Supabase:", err);
   }
+  return config;
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await getSiteConfig();
+  const ogImageUrl = config.ogImage.startsWith("http")
+    ? config.ogImage
+    : `${config.url}${config.ogImage}`;
 
   return {
     metadataBase: new URL(config.url),
@@ -93,7 +119,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: config.description,
       images: [
         {
-          url: config.ogImage,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: config.name,
@@ -104,13 +130,8 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: `${config.name} | ${config.tagline}`,
       description: config.description,
-      images: [config.ogImage],
+      images: [ogImageUrl],
       creator: "@dkcreativesoln",
-    },
-    icons: {
-      icon: "/icon",
-      shortcut: "/icon",
-      apple: "/icon",
     },
   };
 }
@@ -122,9 +143,13 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const organizationSchema = getOrganizationSchema();
-  const websiteSchema = getWebsiteSchema();
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const config = await getSiteConfig();
+  const organizationSchema = getOrganizationSchema(config);
+  const websiteSchema = getWebsiteSchema(config);
+  const breadcrumbSchema = getBreadcrumbSchema(config);
+  const localBusinessSchema = getLocalBusinessSchema(config);
+  const servicesSchema = getServicesSchema(config);
 
   return (
     <html
@@ -133,6 +158,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.webmanifest" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
@@ -141,6 +171,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        />
+        {servicesSchema.map((schema, index) => (
+          <script
+            key={index}
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
+        ))}
       </head>
       <body className="min-h-screen bg-dk-bg font-body text-white antialiased">
         <SiteConfigProvider>

@@ -105,10 +105,10 @@ export function VideoPortfolio() {
     <section id="video-editing" className="relative bg-dk-bg py-24 sm:py-32">
       <div className="container">
         <SectionHeading
-          eyebrow="Video Editing"
-          title="A portfolio built for"
-          highlight="attention spans"
-          description="Reels, shorts, and motion graphics edited for retention — plus a look at the grade and pacing work behind the scenes."
+          eyebrow="Video Editing Portfolio"
+          title="Premium Video Edits &"
+          highlight="Motion Graphics"
+          description="High-retention video editing services for YouTube, social media reels, shorts, and corporate promotions designed to boost brand engagement."
         />
 
         <FilterPills
