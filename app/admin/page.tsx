@@ -147,6 +147,7 @@ export default function AdminPage() {
   // Edit / Add modal states
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<AdminItem | null>(null);
+  const [viewingQuery, setViewingQuery] = useState<AdminItem | null>(null);
 
   // Form Fields State
   const [formFields, setFormFields] = useState<Partial<AdminItem>>({});
@@ -1300,14 +1301,84 @@ export default function AdminPage() {
                     Clear Search
                   </button>
                 </div>
+              ) : activeTab === "queries" ? (
+                /* INQUIRIES TABLE VIEW */
+                <div className="rounded-2xl border border-white/5 bg-[#0b0b0b]/60 backdrop-blur-md overflow-hidden shadow-glow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-white/5 bg-white/[0.01] text-dk-muted font-mono text-[9px] uppercase tracking-wider">
+                          <th className="px-6 py-4 font-semibold">Date</th>
+                          <th className="px-6 py-4 font-semibold">Name</th>
+                          <th className="px-6 py-4 font-semibold">Contact Info</th>
+                          <th className="px-6 py-4 font-semibold">Service</th>
+                          <th className="px-6 py-4 font-semibold">Timeline</th>
+                          <th className="px-6 py-4 font-semibold">Details</th>
+                          <th className="px-6 py-4 font-semibold text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 text-xs">
+                        {filteredSortedItems.map((item) => (
+                          <tr key={item.id} className="hover:bg-white/[0.01] transition-colors group">
+                            <td className="px-6 py-4 text-dk-muted font-mono whitespace-nowrap">
+                              {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "N/A"}
+                            </td>
+                            <td className="px-6 py-4 font-semibold text-white whitespace-nowrap">
+                              {item.name}
+                            </td>
+                            <td className="px-6 py-4 font-mono text-dk-muted whitespace-nowrap">
+                              <div className="text-white/80">{item.email}</div>
+                              <div className="text-[10px] mt-0.5">{item.phone || "N/A"}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="inline-flex items-center rounded-full bg-primary/10 border border-primary/20 text-primary px-2.5 py-0.5 text-[9px] font-semibold uppercase">
+                                {item.category}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-white/80 whitespace-nowrap">
+                              {item.priority || "N/A"}
+                            </td>
+                            <td className="px-6 py-4 text-dk-muted max-w-sm">
+                              {item.subCategory && (
+                                <div className="text-white/70 font-mono text-[10px] mb-1">
+                                  Type: {item.subCategory}
+                                </div>
+                              )}
+                              <div className="line-clamp-2 text-white/60 italic" title={item.details}>
+                                &ldquo;{item.details}&rdquo;
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-right whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => setViewingQuery(item)}
+                                  className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/5 hover:text-primary transition-colors"
+                                >
+                                  View Details
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(item.id)}
+                                  aria-label={`Delete ${item.id}`}
+                                  className="rounded-full p-2 text-dk-muted hover:bg-white/5 hover:text-destructive transition-colors"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               ) : (
-                /* CARD GRID / LIST VIEW FOR ALL CONTENT TYPES */
+                /* CARD GRID / LIST VIEW FOR ALL OTHER CONTENT TYPES */
                 <div className={
                   viewMode === "list"
                     ? "flex flex-col gap-2"
                     : activeTab === "stats"
                     ? "grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
-                    : activeTab === "testimonials" || activeTab === "queries"
+                    : activeTab === "testimonials"
                     ? "grid gap-6 grid-cols-1 md:grid-cols-2"
                     : "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
                 }>
@@ -1738,54 +1809,7 @@ export default function AdminPage() {
                         </div>
                       )}
 
-                      {/* INQUIRIES CARD */}
-                      {activeTab === "queries" && (
-                        <div className="flex flex-col h-full justify-between space-y-4 w-full">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-white/5 pb-3">
-                            <div>
-                              <h4 className="text-sm font-bold text-white">
-                                {item.name}
-                              </h4>
-                              <span className="text-[10px] text-dk-muted font-mono block mt-0.5">
-                                {item.email} · {item.phone}
-                              </span>
-                            </div>
-                            <span className="self-start rounded-full bg-primary/10 border border-primary/20 text-primary px-2.5 py-0.5 text-[9px] font-semibold uppercase">
-                              {item.category}
-                            </span>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-3 text-[10px] font-mono text-white/50">
-                            <div className="rounded bg-white/[0.02] border border-white/5 p-2">
-                              <span className="text-dk-muted block uppercase text-[8px] tracking-wider mb-0.5">Timeline</span>
-                              {item.priority || "N/A"}
-                            </div>
-                            {item.subCategory && (
-                              <div className="rounded bg-white/[0.02] border border-white/5 p-2">
-                                <span className="text-dk-muted block uppercase text-[8px] tracking-wider mb-0.5">Format/Type</span>
-                                {item.subCategory}
-                              </div>
-                            )}
-                          </div>
 
-                          <p className="text-xs leading-relaxed text-white/70 italic bg-white/[0.02] border border-white/5 p-3 rounded-xl">
-                            &ldquo;{item.details}&rdquo;
-                          </p>
-
-                          <div className="flex items-center justify-between border-t border-white/5 pt-3.5 mt-auto">
-                            <span className="text-[9px] font-mono text-white/30">
-                              Submitted: {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "N/A"}
-                            </span>
-                            <button
-                              onClick={() => handleDelete(item.id)}
-                              aria-label={`Delete ${item.id}`}
-                              className="rounded-full p-2 text-dk-muted hover:bg-white/5 hover:text-destructive transition-colors"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -2716,6 +2740,94 @@ export default function AdminPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* View Inquiry Details Modal */}
+      {viewingQuery && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-2xl border border-white/5 bg-[#090909] p-6 shadow-glow-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-white/5 pb-3.5 mb-4">
+              <h3 className="font-display text-lg font-bold text-white">
+                Inquiry Details
+              </h3>
+              <span className="text-[10px] font-mono text-dk-muted">
+                Submitted: {viewingQuery.createdAt ? new Date(viewingQuery.createdAt).toLocaleString() : "N/A"}
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-4 text-sm">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-dk-muted">Name</span>
+                  <span className="font-semibold text-white">{viewingQuery.name}</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-dk-muted">Service Category</span>
+                  <span className="inline-flex w-fit items-center rounded-full bg-primary/10 border border-primary/20 text-primary px-2.5 py-0.5 text-[10px] font-semibold uppercase">
+                    {viewingQuery.category}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-dk-muted">Email</span>
+                  <a href={`mailto:${viewingQuery.email}`} className="text-white hover:text-primary transition-colors underline font-mono">
+                    {viewingQuery.email}
+                  </a>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-dk-muted">Phone Number</span>
+                  <a href={`tel:${viewingQuery.phone}`} className="text-white hover:text-primary transition-colors underline font-mono">
+                    {viewingQuery.phone || "N/A"}
+                  </a>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-dk-muted">Timeline / Priority</span>
+                  <span className="text-white">{viewingQuery.priority || "N/A"}</span>
+                </div>
+                {viewingQuery.subCategory && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-dk-muted">Platform Type</span>
+                    <span className="text-white">{viewingQuery.subCategory}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-1 border-t border-white/5 pt-4 mt-2">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-dk-muted mb-1">Message Details</span>
+                <p className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-white/80 leading-relaxed whitespace-pre-wrap italic">
+                  &ldquo;{viewingQuery.details}&rdquo;
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6 border-t border-white/5 pt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm("Are you sure you want to delete this inquiry?")) {
+                    handleDelete(viewingQuery.id);
+                    setViewingQuery(null);
+                  }
+                }}
+                className="rounded-xl border border-rose-500/20 bg-rose-950/20 px-4 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-900/40 transition-colors"
+              >
+                Delete
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewingQuery(null)}
+                className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 transition-colors"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

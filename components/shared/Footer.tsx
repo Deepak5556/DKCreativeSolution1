@@ -3,11 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  Github,
-  Linkedin,
   Instagram,
-  Twitter,
-  Youtube,
   Mail,
   Phone,
   MapPin,
@@ -23,11 +19,8 @@ import type { ServiceItem } from "@/types";
 export function Footer() {
   const config = useSiteConfig();
   const socialLinks = [
-    { label: "GitHub", href: config.links.github, icon: Github },
-    { label: "LinkedIn", href: config.links.linkedin, icon: Linkedin },
     { label: "Instagram", href: config.links.instagram, icon: Instagram },
-    { label: "Twitter", href: config.links.twitter, icon: Twitter },
-    { label: "YouTube", href: config.links.youtube, icon: Youtube },
+    { label: "WhatsApp", href: config.links.whatsapp, icon: MessageCircle },
   ];
   const pathname = usePathname();
   const year = new Date().getFullYear();

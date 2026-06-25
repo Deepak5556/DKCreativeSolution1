@@ -25,7 +25,7 @@ export const siteConfig = {
   links: {
     github: "https://github.com/dk-creative-solutions",
     linkedin: "https://www.linkedin.com/in/dk-creative-solutions",
-    instagram: "https://www.instagram.com/dk.creativesolutions",
+    instagram: "https://www.instagram.com/dpak.dev_/",
     twitter: "https://twitter.com/dkcreativesoln",
     youtube: "https://www.youtube.com/@dkcreativesolutions",
     behance: "https://www.behance.net/dkcreativesolutions",
