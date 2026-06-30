@@ -1,8 +1,5 @@
 import { supabase } from "./supabase";
 
-import fs from "fs";
-import path from "path";
-
 function mapKeys(obj: unknown, mapper: (key: string) => string): unknown {
   if (obj === null || obj === undefined) return obj;
   if (Array.isArray(obj)) {
@@ -49,36 +46,6 @@ export async function readData(type: string): Promise<unknown[]> {
   }
 
   const camelData = toCamelCase(data || []) as unknown[];
-
-  // Auto-seeding: If database returned 0 records, try to populate from local JSON backup
-  if ((!camelData || camelData.length === 0) && typeof window === "undefined") {
-    try {
-      const filename = type === "process" ? "process.json" : `${type}.json`;
-      const dbPath = path.join(process.cwd(), "data", "db", filename);
-      if (fs.existsSync(dbPath)) {
-        console.log(`Auto-seeding ${type} from local backup...`);
-        const localData = JSON.parse(fs.readFileSync(dbPath, "utf-8"));
-        if (Array.isArray(localData) && localData.length > 0) {
-          // Write to Supabase
-          await writeData(type, localData);
-          // Re-fetch to get correct records
-          let reFetchQuery = supabase.from(table).select("*");
-          if (hasOrderIdx) {
-            reFetchQuery = reFetchQuery.order("order_idx", { ascending: true });
-          } else if (type === "queries" || type === "blogs") {
-            reFetchQuery = reFetchQuery.order("created_at", { ascending: false });
-          }
-          const { data: reFetched } = await reFetchQuery;
-          if (reFetched && reFetched.length > 0) {
-            return toCamelCase(reFetched) as unknown[];
-          }
-          return localData;
-        }
-      }
-    } catch (seedError) {
-      console.error(`Failed to auto-seed ${type}:`, seedError);
-    }
-  }
 
   return camelData;
 }

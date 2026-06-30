@@ -37,6 +37,8 @@ import {
   LayoutList,
   Settings,
   History,
+  Menu,
+  X,
 } from "lucide-react";
 import { AVAILABLE_ICONS, resolveIcon } from "@/lib/icons";
 import {
@@ -125,6 +127,7 @@ export default function AdminPage() {
   const [loggingIn, setLoggingIn] = useState(false);
 
   const [activeTab, setActiveTab] = useState<ContentType>("dashboard");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [items, setItems] = useState<AdminItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
 
@@ -742,13 +745,136 @@ export default function AdminPage() {
     );
   }
 
+  const adminTabs = [
+    { id: "dashboard" as const, label: "Overview Home" },
+    { id: "services" as const, label: "Services" },
+    { id: "projects" as const, label: "Projects" },
+    { id: "videos" as const, label: "Video Editing" },
+    { id: "posters" as const, label: "Posters" },
+    { id: "stats" as const, label: "Stats" },
+    { id: "testimonials" as const, label: "Testimonials" },
+    { id: "process" as const, label: "Process Steps" },
+    { id: "features" as const, label: "Why Us (Features)" },
+    { id: "queries" as const, label: "Inquiries / Leads" },
+    { id: "site_settings" as const, label: "Site Settings" },
+    { id: "change_history" as const, label: "Change History" },
+  ];
+
   return (
     <div className="flex min-h-screen flex-col lg:flex-row bg-[#030303] text-white">
       {/* Dynamic Grid Overlay */}
       <div className="absolute inset-0 bg-grid bg-grid-fade opacity-[0.15] pointer-events-none" />
 
-      {/* Side Navigation panel */}
-      <aside className="relative z-10 w-full lg:w-[260px] flex-shrink-0 border-b lg:border-b-0 lg:border-r border-white/5 bg-black/40 backdrop-blur-md flex flex-col">
+      {/* ── Mobile Top Bar ── */}
+      <div className="relative z-30 flex items-center justify-between border-b border-white/5 bg-black/80 backdrop-blur-xl px-4 py-3 lg:hidden">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMobileNavOpen(!mobileNavOpen)}
+            aria-label="Toggle navigation menu"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.02] text-white hover:bg-white/5 transition-colors"
+          >
+            {mobileNavOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+          <h1 className="font-display text-sm font-bold text-white tracking-wide">
+            DK <span className="text-gradient-gold">Creative</span>
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[8px] uppercase tracking-wider bg-primary/10 border border-primary/20 text-primary px-1.5 py-0.5 rounded-full">
+            Console v2
+          </span>
+          <button
+            onClick={handleLogout}
+            aria-label="Logout"
+            className="rounded-full p-2 text-white/50 border border-white/5 bg-white/[0.01] hover:text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-all focus:outline-none"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* ── Mobile Nav Overlay ── */}
+      {mobileNavOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setMobileNavOpen(false)}
+          />
+          {/* Slide-in panel */}
+          <aside className="absolute left-0 top-0 bottom-0 w-[280px] max-w-[80vw] flex flex-col bg-[#070707] border-r border-white/5 overflow-y-auto animate-fadeIn">
+            {/* Mobile nav header */}
+            <div className="p-5 border-b border-white/5 flex items-center justify-between">
+              <Link href="/" className="inline-flex items-center gap-2 text-xs font-medium text-dk-muted hover:text-white">
+                <ArrowLeft className="h-3 w-3" />
+                Back to Site
+              </Link>
+              <button
+                onClick={() => setMobileNavOpen(false)}
+                className="rounded-full p-2 text-white/50 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="px-5 py-4 border-b border-white/5">
+              <h1 className="font-display text-lg font-bold text-white tracking-wide">
+                DK <span className="text-gradient-gold">Creative</span>
+              </h1>
+              <p className="text-[10px] text-dk-muted uppercase tracking-[0.2em] mt-1 font-mono">
+                Control Center
+              </p>
+            </div>
+
+            {/* Mobile nav links */}
+            <nav className="flex-1 p-3 flex flex-col gap-1 overflow-y-auto" aria-label="Mobile Navigation">
+              {adminTabs.map((tab) => {
+                const IconComponent = tabIcons[tab.id];
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      setActiveTab(tab.id);
+                      setMobileNavOpen(false);
+                    }}
+                    className={`flex items-center gap-3 rounded-xl px-4 py-3 text-left font-display text-xs font-semibold tracking-wide transition-all w-full select-none ${
+                      isActive
+                        ? "bg-gold-gradient text-dk-bg shadow-glow-sm"
+                        : "border border-transparent text-dk-muted hover:border-white/5 hover:bg-white/[0.02] hover:text-white"
+                    }`}
+                  >
+                    <IconComponent className={`h-4 w-4 ${isActive ? "text-dk-bg" : "text-primary/70"}`} />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Mobile nav footer */}
+            <div className="p-4 border-t border-white/5 flex items-center justify-between gap-2">
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] font-mono text-white/40 truncate">
+                  {ADMIN_EMAIL}
+                </span>
+                <span className="text-[9px] text-primary font-semibold">
+                  Administrator
+                </span>
+              </div>
+              <button
+                onClick={handleLogout}
+                aria-label="Logout"
+                className="rounded-full p-2.5 text-white/50 border border-white/5 bg-white/[0.01] hover:text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-all focus:outline-none"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {/* ── Desktop Sidebar ── */}
+      <aside className="relative z-10 hidden lg:flex w-[260px] flex-shrink-0 border-r border-white/5 bg-black/40 backdrop-blur-md flex-col">
         {/* Sidebar Header */}
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <Link href="/" className="inline-flex items-center gap-2 text-xs font-medium text-dk-muted hover:text-white">
@@ -772,23 +898,8 @@ export default function AdminPage() {
         </div>
 
         {/* Sidebar Navigation */}
-        <nav className="flex-1 p-4 flex flex-row flex-wrap lg:flex-col gap-1 overflow-y-auto" aria-label="Sidebar Content Selector">
-          {(
-            [
-              { id: "dashboard", label: "Overview Home" },
-              { id: "services", label: "Services" },
-              { id: "projects", label: "Projects" },
-              { id: "videos", label: "Video Editing" },
-              { id: "posters", label: "Posters" },
-              { id: "stats", label: "Stats" },
-              { id: "testimonials", label: "Testimonials" },
-              { id: "process", label: "Process Steps" },
-              { id: "features", label: "Why Us (Features)" },
-              { id: "queries", label: "Inquiries / Leads" },
-              { id: "site_settings", label: "Site Settings" },
-              { id: "change_history", label: "Change History" },
-            ] as const
-          ).map((tab) => {
+        <nav className="flex-1 p-4 flex flex-col gap-1 overflow-y-auto" aria-label="Sidebar Content Selector">
+          {adminTabs.map((tab) => {
             const IconComponent = tabIcons[tab.id];
             const isActive = activeTab === tab.id;
             return (
@@ -831,9 +942,9 @@ export default function AdminPage() {
       {/* Main Panel Content */}
       <main className="relative z-10 flex-1 flex flex-col min-w-0 bg-transparent">
         {/* Top Header bar */}
-        <header className="p-6 border-b border-white/5 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold font-display tracking-tight text-white capitalize">
+        <header className="p-4 sm:p-6 border-b border-white/5 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-base sm:text-xl font-bold font-display tracking-tight text-white capitalize truncate">
               {activeTab === "dashboard"
                 ? "System Dashboard"
                 : activeTab === "site_settings"
@@ -842,7 +953,7 @@ export default function AdminPage() {
                 ? "Change History Log"
                 : `${activeTab} management`}
             </h2>
-            <p className="text-[10px] text-dk-muted mt-0.5">
+            <p className="text-[10px] text-dk-muted mt-0.5 hidden sm:block">
               {activeTab === "dashboard"
                 ? "Overview of website performance and dynamic content details."
                 : activeTab === "site_settings"
@@ -853,14 +964,14 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             {activeTab !== "dashboard" && activeTab !== "queries" && activeTab !== "site_settings" && activeTab !== "change_history" && (
               <button
                 onClick={openAddModal}
-                className="flex items-center gap-1.5 rounded-full bg-gold-gradient px-4 py-2.5 text-xs font-bold text-dk-bg shadow-glow-sm hover:scale-105 transition-transform"
+                className="flex items-center gap-1.5 rounded-full bg-gold-gradient px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-dk-bg shadow-glow-sm hover:scale-105 transition-transform"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Add Item
+                <span className="hidden sm:inline">Add Item</span>
               </button>
             )}
           </div>

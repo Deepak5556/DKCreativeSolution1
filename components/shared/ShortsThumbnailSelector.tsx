@@ -271,6 +271,7 @@ export function ShortsThumbnailSelector({
                   >
                     {/* Portrait 9:16 thumbnail preview container */}
                     <div className="relative aspect-[9/16] w-full overflow-hidden bg-black">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={option.url}
                         alt={option.name}

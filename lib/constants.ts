@@ -104,12 +104,12 @@ export const siteConfig = {
     "Branding"
   ],
   links: {
-    // github: "https://github.com/dk-creative-solutions",
-    // linkedin: "https://www.linkedin.com/in/dk-creative-solutions",
+    github: "",
+    linkedin: "",
     instagram: "https://www.instagram.com/dpak.dev_/",
-    // twitter: "https://twitter.com/dkcreativesoln",
+    twitter: "",
     youtube: "https://www.youtube.com/@dkcreativesolutions",
-    // behance: "https://www.behance.net/dkcreativesolutions",
+    behance: "",
     whatsapp: "https://wa.me/919972879256",
   },
 };

@@ -1,47 +1,47 @@
-[
-  {
-    "id": "t1",
-    "name": "Ananya Rao",
-    "role": "Founder",
-    "company": "Lumen Studio",
-    "quote": "DK rebuilt our website from the ground up and the difference was night and day. The animations feel expensive without ever feeling slow.",
-    "rating": 5,
-    "initials": "AR"
-  },
-  {
-    "id": "t2",
-    "name": "Karthik Subramaniam",
-    "role": "Marketing Lead",
-    "company": "Northfield Foods",
-    "quote": "Our Instagram posters finally look like they belong to a brand twice our size. Turnaround was fast and revisions were painless.",
-    "rating": 5,
-    "initials": "KS"
-  },
-  {
-    "id": "t3",
-    "name": "Priya Menon",
-    "role": "Co-founder",
-    "company": "Cognito Labs",
-    "quote": "The learning platform DK built handles thousands of students without breaking a sweat. Communication throughout was excellent.",
-    "rating": 5,
-    "initials": "PM"
-  },
-  {
-    "id": "t4",
-    "name": "Rohan Das",
-    "role": "Event Director",
-    "company": "Eventura",
-    "quote": "From concept to final cut, the video edits captured exactly the energy we wanted. Our shorts now consistently outperform past content.",
-    "rating": 5,
-    "initials": "RD"
-  },
-  {
-    "id": "t5",
-    "name": "Sneha Iyer",
-    "role": "Product Manager",
-    "company": "Sparkline App",
-    "quote": "Clean UI, thoughtful UX, and genuinely fast delivery. DK asked the right questions before writing a single line of code.",
-    "rating": 5,
-    "initials": "SI"
-  }
-]
+// [
+//   {
+//     "id": "t1",
+//     "name": "Ananya Rao",
+//     "role": "Founder",
+//     "company": "Lumen Studio",
+//     "quote": "DK rebuilt our website from the ground up and the difference was night and day. The animations feel expensive without ever feeling slow.",
+//     "rating": 5,
+//     "initials": "AR"
+//   },
+//   {
+//     "id": "t2",
+//     "name": "Karthik Subramaniam",
+//     "role": "Marketing Lead",
+//     "company": "Northfield Foods",
+//     "quote": "Our Instagram posters finally look like they belong to a brand twice our size. Turnaround was fast and revisions were painless.",
+//     "rating": 5,
+//     "initials": "KS"
+//   },
+//   {
+//     "id": "t3",
+//     "name": "Priya Menon",
+//     "role": "Co-founder",
+//     "company": "Cognito Labs",
+//     "quote": "The learning platform DK built handles thousands of students without breaking a sweat. Communication throughout was excellent.",
+//     "rating": 5,
+//     "initials": "PM"
+//   },
+//   {
+//     "id": "t4",
+//     "name": "Rohan Das",
+//     "role": "Event Director",
+//     "company": "Eventura",
+//     "quote": "From concept to final cut, the video edits captured exactly the energy we wanted. Our shorts now consistently outperform past content.",
+//     "rating": 5,
+//     "initials": "RD"
+//   },
+//   {
+//     "id": "t5",
+//     "name": "Sneha Iyer",
+//     "role": "Product Manager",
+//     "company": "Sparkline App",
+//     "quote": "Clean UI, thoughtful UX, and genuinely fast delivery. DK asked the right questions before writing a single line of code.",
+//     "rating": 5,
+//     "initials": "SI"
+//   }
+// ]
